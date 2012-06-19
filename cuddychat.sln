@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+# SharpDevelop 4.1.0.8000
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{3CFC8C0C-DE3A-4BED-98BA-3C7F7F7CFF90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{2CFC11FC-A185-42DE-8199-0302644B1D47}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CFC8C0C-DE3A-4BED-98BA-3C7F7F7CFF90}.Debug|x86.Build.0 = Debug|x86
+		{3CFC8C0C-DE3A-4BED-98BA-3C7F7F7CFF90}.Debug|x86.ActiveCfg = Debug|x86
+		{3CFC8C0C-DE3A-4BED-98BA-3C7F7F7CFF90}.Release|x86.Build.0 = Release|x86
+		{3CFC8C0C-DE3A-4BED-98BA-3C7F7F7CFF90}.Release|x86.ActiveCfg = Release|x86
+		{2CFC11FC-A185-42DE-8199-0302644B1D47}.Debug|x86.Build.0 = Debug|x86
+		{2CFC11FC-A185-42DE-8199-0302644B1D47}.Debug|x86.ActiveCfg = Debug|x86
+		{2CFC11FC-A185-42DE-8199-0302644B1D47}.Release|x86.Build.0 = Release|x86
+		{2CFC11FC-A185-42DE-8199-0302644B1D47}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+EndGlobal
