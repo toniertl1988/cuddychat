@@ -2,20 +2,20 @@
 using System.Windows;
 using System.Data;
 using System.Xml;
-using System.IO;
 using System.Configuration;
 using System.Windows.Threading;
 
-namespace Chat
+namespace Client
 {
 	/// <summary>
 	/// Interaction logic for App.xaml
 	/// </summary>
 	public partial class App : Application
 	{
-		private void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        public void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            e.Handled = false;
+        	e.Handled = true;
+        	MessageBox.Show(e.Exception.Message);
         }
 	}
 }

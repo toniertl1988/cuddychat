@@ -42,9 +42,13 @@ namespace Server
 			findSelfIpAddress();
 		}
 		
-		public void setIpAddress(IPAddress address)
+		public void setIpAddress(string ip)
 		{
-			ipAddress = address;
+			try {
+				ipAddress = IPAddress.Parse(ip);
+			} catch (Exception) {
+				throw new Exception("ungültige IP");
+			}
 		}
 				
 		public static void AddUser(TcpClient tcpUser, string strUsername)
@@ -130,14 +134,19 @@ namespace Server
 			}
 		}
 		
-		public void StartListening()
+		public bool StartListening()
 		{
-			IPAddress ipLocal = ipAddress;
-			tlsClient = new TcpListener(ipLocal, 8118);
-			tlsClient.Start();
-			ServRunning = true;
-			thrListener = new Thread(KeepListening);
-            thrListener.Start();
+			try {
+				IPAddress ipLocal = ipAddress;
+				tlsClient = new TcpListener(ipLocal, 8118);
+				tlsClient.Start();
+				ServRunning = true;
+				thrListener = new Thread(KeepListening);
+            	thrListener.Start();
+            	return true;
+			} catch (Exception) {
+				return false;
+			}
 		}
 		
 		private void KeepListening()

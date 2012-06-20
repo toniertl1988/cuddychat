@@ -42,16 +42,17 @@ namespace Server
 		
 		private void btnListen_Click(object sender, EventArgs e)
 		{
-			IPAddress ipAddr = IPAddress.Parse(txtIp.Text);
-			mainServer.setIpAddress(ipAddr);
+			mainServer.setIpAddress(txtIp.Text);
 			if (mainServer.getServerStatus() == false)
 			{
 				ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
-				mainServer.StartListening();
-				txtLog.AppendText("Monitoring for connections...\r");
-				//txtLog.AppendText(mainServer.getSelfIpAddress());
-				btnListen.Content = "Stop Listening";
-				txtIp.IsEnabled = false;
+				if (mainServer.StartListening() == false) {
+					MessageBox.Show("Server konnte nicht gestartet werden!");
+				} else {
+					txtLog.AppendText("Monitoring for connections...\r");
+					btnListen.Content = "Stop Listening";
+					txtIp.IsEnabled = false;
+				}
 			}
 			else
 			{

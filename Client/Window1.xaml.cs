@@ -45,6 +45,7 @@ namespace Chat
 		public Window1()
 		{
 			InitializeComponent();
+			txtLog.Document.Blocks.Clear();
 		}
 		
 		private void btnConnect_Click(object sender, EventArgs e)
@@ -55,11 +56,19 @@ namespace Chat
 				{
 					InitializeConnection();
 					btnConnect.Content = "Disconnect";
+					txtIp.IsEnabled = false;
+					txtUser.IsEnabled = false;
+				}
+				else
+				{
+					MessageBox.Show("Benutzername und Server IP müssen eingetragen sein!");
 				}
 			}
 			else
 			{
 				btnConnect.Content = "Connect";
+				txtIp.IsEnabled = true;
+				txtUser.IsEnabled = true;
 				CloseConnection("Disconnected at user's request.");
 			}
 		}
