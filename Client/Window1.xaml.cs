@@ -22,6 +22,7 @@ using System.Threading;
 using System.Drawing;
 using System.Diagnostics;
 using System.Windows.Media.Imaging;
+using System.Text.RegularExpressions;
 
 namespace Chat
 {
@@ -41,6 +42,8 @@ namespace Chat
 		private Thread thrMessaging;
 		private IPAddress ipAddr;
 		private bool Connected;
+		
+		private static readonly Regex regexSmilies = new Regex(@":[-]{0,1}[)|D]");
 		
 		public Window1()
 		{
@@ -116,23 +119,8 @@ namespace Chat
 			if (strMessage.Length != 0)
 			{
 				Paragraph p = new Paragraph();
-				p.LineHeight = 1;
-                p.Inlines.Add(strMessage);
-                // Bild hinzufugen falls vorhanden
-                try
-                {
-                    BitmapImage bitmapSmiley = new BitmapImage(new Uri("310.gif", UriKind.Relative));
-                    System.Windows.Controls.Image smiley = new System.Windows.Controls.Image();
-                    smiley.Source = bitmapSmiley;
-                    smiley.Width = bitmapSmiley.Width;
-                    smiley.Height = bitmapSmiley.Height;
-                    p.Inlines.Add(smiley);
-                }
-                catch (FileNotFoundException)
-                {
-                    // Loggen file not found
-                }
-				
+				p.LineHeight = 1;                
+				p = insertSmileys(p, strMessage);
 				txtLog.Document.Blocks.Add(p);
 				txtLog.ScrollToEnd();
 			}
@@ -187,5 +175,33 @@ namespace Chat
 		{
 			System.Diagnostics.Process.Start((sender as Hyperlink).NavigateUri.AbsoluteUri);
 		}
+    	
+    	public Paragraph insertSmileys(Paragraph p, string text)
+    	{
+    		int lastPos = 0;
+    		foreach (Match match in regexSmilies.Matches(text)) {
+            	if (match.Index != lastPos) {
+					p.Inlines.Add(text.Substring(lastPos, match.Index - lastPos));
+	                // Bild hinzufugen falls vorhanden
+            		try {
+                		BitmapImage bitmapSmiley = new BitmapImage(new Uri("laugh.gif", UriKind.Relative));
+                		System.Windows.Controls.Image smiley = new System.Windows.Controls.Image();
+                		smiley.Source = bitmapSmiley;
+                		smiley.Width = bitmapSmiley.Width;
+                		smiley.Height = bitmapSmiley.Height;
+                		p.Inlines.Add(smiley);
+            		}
+            		catch (FileNotFoundException)
+            		{
+                		// Loggen file not found
+            		}
+					lastPos = match.Index + match.Length;
+				}
+			}
+			if (lastPos < text.Length) {
+        		p.Inlines.Add(text.Substring(lastPos));
+    		}
+    		return p;
+    	}
 	}
 }
