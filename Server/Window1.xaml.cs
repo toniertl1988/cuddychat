@@ -38,6 +38,7 @@ namespace Server
 			InitializeComponent();
 			mainServer = new ChatServer();
 			txtIp.Text = mainServer.getSelfIpAddress();
+			ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
 		}
 		
 		private void btnListen_Click(object sender, EventArgs e)
@@ -45,7 +46,6 @@ namespace Server
 			mainServer.setIpAddress(txtIp.Text);
 			if (mainServer.getServerStatus() == false)
 			{
-				ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
 				if (mainServer.StartListening() == false) {
 					MessageBox.Show("Server konnte nicht gestartet werden!");
 				} else {
