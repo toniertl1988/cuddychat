@@ -36,24 +36,29 @@ namespace Server
 		public Window1()
 		{
 			InitializeComponent();
+			mainServer = new ChatServer();
+			txtIp.Text = mainServer.getSelfIpAddress();
 		}
 		
 		private void btnListen_Click(object sender, EventArgs e)
 		{
 			IPAddress ipAddr = IPAddress.Parse(txtIp.Text);
-			mainServer = new ChatServer(ipAddr);
+			mainServer.setIpAddress(ipAddr);
 			if (mainServer.getServerStatus() == false)
 			{
 				ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
 				mainServer.StartListening();
 				txtLog.AppendText("Monitoring for connections...\r");
-				txtLog.AppendText("" + mainServer.getServerStatus());
+				//txtLog.AppendText(mainServer.getSelfIpAddress());
 				btnListen.Content = "Stop Listening";
+				txtIp.IsEnabled = false;
 			}
 			else
 			{
 				mainServer.StopListening();
 				btnListen.Content = "Start Listening";
+				txtLog.AppendText("Stop Monitoring\r");
+				txtIp.IsEnabled = true;
 			}
 		}
 		
@@ -72,7 +77,7 @@ namespace Server
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-        	if (mainServer != null) {
+        	if (mainServer.getServerStatus() == true) {
         		mainServer.StopListening();
         	}
         }

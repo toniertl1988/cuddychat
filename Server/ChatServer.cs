@@ -35,7 +35,14 @@ namespace Server
 		private TcpListener tlsClient;
 		bool ServRunning = false;
 		
-		public ChatServer(IPAddress address)
+		private string _selfIpAddress = "";
+		
+		public ChatServer()
+		{
+			findSelfIpAddress();
+		}
+		
+		public void setIpAddress(IPAddress address)
 		{
 			ipAddress = address;
 		}
@@ -166,13 +173,38 @@ namespace Server
         public void StopListening()
         {
         	ServRunning = false;
-        	thrListener.Abort();
-        	tlsClient.Stop();
+        	if (thrListener != null)
+        	{
+        		thrListener.Abort();
+        	}
+        	if (tlsClient != null)
+        	{
+        		tlsClient.Stop();
+        	}
         }
         
         public bool getServerStatus()
         {
         	return this.ServRunning;
+        }
+        
+        public string getSelfIpAddress()
+        {
+        	return this._selfIpAddress;
+        }
+        
+        public void findSelfIpAddress()
+        {
+        	IPHostEntry Host = Dns.GetHostEntry(Dns.GetHostName());
+    		foreach (IPAddress IP in Host.AddressList)
+    		{
+    			string tmp = IP.ToString();
+    			if (tmp.Length == 15)
+    			{
+    				this._selfIpAddress = tmp;
+    				break;
+    			}
+    		}
         }
         
         ~ChatServer()
