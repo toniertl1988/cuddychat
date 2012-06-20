@@ -82,5 +82,13 @@ namespace Server
         		mainServer.StopListening();
         	}
         }
+        
+    	public void closeApplication(object sender, EventArgs e)
+    	{
+        	if (mainServer.getServerStatus() == true) {
+        		mainServer.StopListening();
+        	}
+    		Application.Current.Shutdown();
+    	}
 	}
 }

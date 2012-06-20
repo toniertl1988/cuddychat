@@ -216,6 +216,9 @@ namespace Chat
     	
     	public void closeApplication(object sender, EventArgs e)
     	{
+        	if (tcpServer != null) {
+        		CloseConnection("Disconnect");
+        	}
     		Application.Current.Shutdown();
     	}
 	}
