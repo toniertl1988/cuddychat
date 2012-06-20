@@ -125,8 +125,8 @@ namespace Server
 		
 		public void StartListening()
 		{
-			IPAddress ipaLocal = ipAddress;
-			tlsClient = new TcpListener(ipaLocal, 8118);
+			IPAddress ipLocal = ipAddress;
+			tlsClient = new TcpListener(ipLocal, 8118);
 			tlsClient.Start();
 			ServRunning = true;
 			thrListener = new Thread(KeepListening);
@@ -168,6 +168,11 @@ namespace Server
         	ServRunning = false;
         	thrListener.Abort();
         	tlsClient.Stop();
+        }
+        
+        public bool getServerStatus()
+        {
+        	return this.ServRunning;
         }
         
         ~ChatServer()

@@ -16,12 +16,6 @@ namespace Chat
 		private void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = false;
-            /*
-            using (StreamWriter sw = new StreamWriter(this.LogFile, true))
-            {
-                sw.WriteLine(String.Format("{0}: {1}", DateTime.Now.ToString(), e.Exception.ToString()));
-            }
-             */
         }
 	}
 }

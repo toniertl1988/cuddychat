@@ -42,9 +42,19 @@ namespace Server
 		{
 			IPAddress ipAddr = IPAddress.Parse(txtIp.Text);
 			mainServer = new ChatServer(ipAddr);
-			ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
-			mainServer.StartListening();
-			txtLog.AppendText("Monitoring for connections...\r");
+			if (mainServer.getServerStatus() == false)
+			{
+				ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
+				mainServer.StartListening();
+				txtLog.AppendText("Monitoring for connections...\r");
+				txtLog.AppendText("" + mainServer.getServerStatus());
+				btnListen.Content = "Stop Listening";
+			}
+			else
+			{
+				mainServer.StopListening();
+				btnListen.Content = "Start Listening";
+			}
 		}
 		
 		public void mainServer_StatusChanged(object sender, StatusChangedEventArgs e)
