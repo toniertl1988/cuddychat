@@ -157,11 +157,21 @@ namespace Chat
 		private void CloseConnection(string Reason)
 		{
 			UpdateLog(Reason);
-			thrMessaging.Abort();
 			Connected = false;
-			swSender.Close();
-			srReceiver.Close();
-			tcpServer.Close();
+			if (thrMessaging != null) {
+				thrMessaging.Abort();
+			}
+			if (swSender != null) {
+				swSender.Close();
+			}
+			if (srReceiver != null)
+			{
+				srReceiver.Close();
+			}
+			if (tcpServer != null)
+			{
+				tcpServer.Close();
+			}
 		}
 		
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -202,6 +212,11 @@ namespace Chat
         		p.Inlines.Add(text.Substring(lastPos));
     		}
     		return p;
+    	}
+    	
+    	public void closeApplication(object sender, EventArgs e)
+    	{
+    		Application.Current.Shutdown();
     	}
 	}
 }
