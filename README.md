@@ -1,8 +1,6 @@
 cuddychat
 =========
-
 Chat Server &amp; Client
-
 
 History
 =======
@@ -12,6 +10,8 @@ History
 
 Roadmap
 ======
-- Version 1.1 - more smiley parsing
-- Version 1.2 - add smiley window
-- Version 1.3 - dynamic smiley add and parsing
+- Version 1.1 - fix smiley parsing
+- Version 1.1.1 - add smiley window
+- Version 1.1.2 - dynamic smiley add and parsing
+
+- Version 1.2 - login window + registration with server
