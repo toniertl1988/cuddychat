@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.Windows.Media.Imaging;
 using System.Text.RegularExpressions;
 
-namespace Chat
+namespace Client
 {
 	/// <summary>
 	/// Interaction logic for Window1.xaml
@@ -45,10 +45,13 @@ namespace Chat
 		
 		private static readonly Regex regexSmilies = new Regex(@":[-]{0,1}[)|D]");
 		
+		private Smiley _smileys = new Smiley();
+		
 		public Window1()
 		{
 			InitializeComponent();
 			txtLog.Document.Blocks.Clear();
+			//StatusBarText.Text = _smileys.getRegex();
 		}
 		
 		private void btnConnect_Click(object sender, EventArgs e)
@@ -119,8 +122,8 @@ namespace Chat
 			if (strMessage.Length != 0)
 			{
 				Paragraph p = new Paragraph();
-				p.LineHeight = 1;                
-				p = insertSmileys(p, strMessage);
+				p.LineHeight = 1;
+				p = _smileys.insertSmileys(p, strMessage);
 				txtLog.Document.Blocks.Add(p);
 				txtLog.ScrollToEnd();
 			}
@@ -185,34 +188,6 @@ namespace Chat
 		{
 			System.Diagnostics.Process.Start((sender as Hyperlink).NavigateUri.AbsoluteUri);
 		}
-    	
-    	public Paragraph insertSmileys(Paragraph p, string text)
-    	{
-    		int lastPos = 0;
-    		foreach (Match match in regexSmilies.Matches(text)) {
-            	if (match.Index != lastPos) {
-					p.Inlines.Add(text.Substring(lastPos, match.Index - lastPos));
-	                // Bild hinzufugen falls vorhanden
-            		try {
-                		BitmapImage bitmapSmiley = new BitmapImage(new Uri("laugh.gif", UriKind.Relative));
-                		System.Windows.Controls.Image smiley = new System.Windows.Controls.Image();
-                		smiley.Source = bitmapSmiley;
-                		smiley.Width = bitmapSmiley.Width;
-                		smiley.Height = bitmapSmiley.Height;
-                		p.Inlines.Add(smiley);
-            		}
-            		catch (FileNotFoundException)
-            		{
-                		// Loggen file not found
-            		}
-					lastPos = match.Index + match.Length;
-				}
-			}
-			if (lastPos < text.Length) {
-        		p.Inlines.Add(text.Substring(lastPos));
-    		}
-    		return p;
-    	}
     	
     	public void closeApplication(object sender, EventArgs e)
     	{

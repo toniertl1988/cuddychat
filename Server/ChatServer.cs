@@ -108,7 +108,7 @@ namespace Server
 		{
 			StreamWriter swSenderSender;
 			e = new StatusChangedEventArgs(From + " says: " + Message);
-			OnStatusChanged(e);
+			//OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
 			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
 			for (int i = 0; i < tcpClients.Length; i++)
@@ -208,7 +208,7 @@ namespace Server
     		foreach (IPAddress IP in Host.AddressList)
     		{
     			string tmp = IP.ToString();
-    			if (tmp.Length == 15)
+    			if (tmp.Length >= 8 && tmp.Length <= 15)
     			{
     				this._selfIpAddress = tmp;
     				break;
