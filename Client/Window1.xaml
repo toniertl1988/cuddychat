@@ -30,6 +30,20 @@
 				</MenuItem>
 			</MenuItem>
 			<MenuItem
+				Header="_Smileys"
+				HorizontalContentAlignment="Left"
+				HorizontalAlignment="Left">
+				<MenuItem
+					Header="_Anzeigen"
+					Click="openSmileyWindow">
+					<MenuItem.ToolTip>
+						<ToolTip>
+				             Alle Smileys anzeigen
+				        </ToolTip>
+					</MenuItem.ToolTip>
+				</MenuItem>
+			</MenuItem>
+			<MenuItem
 				Header="_Help"
 				Name="menuItem1">
 				<MenuItem

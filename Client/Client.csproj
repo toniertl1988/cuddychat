@@ -67,6 +67,10 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\WPFAssemblyInfo.cs" />
+    <Compile Include="SmileyWindow.xaml.cs">
+      <DependentUpon>SmileyWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Smiley.cs" />
     <Compile Include="Window1.xaml.cs">
       <SubType>Code</SubType>
@@ -74,6 +78,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="SmileyWindow.xaml" />
     <Page Include="Window1.xaml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />

@@ -196,5 +196,11 @@ namespace Client
         	}
     		Application.Current.Shutdown();
     	}
+    	
+    	public void openSmileyWindow(object sender, EventArgs e)
+    	{
+    		SmileyWindow window = new SmileyWindow(_smileys);
+    		window.Show();
+    	}
 	}
 }
