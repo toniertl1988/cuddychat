@@ -11,7 +11,9 @@ History
 Roadmap
 ======
 - Version 1.1 - fix smiley parsing
-- Version 1.1.1 - add smiley window
-- Version 1.1.2 - dynamic smiley add and parsing
+- Version 1.1.1 - first security option -> only chat client can be connected to the server
+- Version 1.1.2 - Show all Smileys Window
+- Version 1.1.3 - add smiley window
+- Version 1.1.4 - dynamic smiley add and parsing
 
 - Version 1.2 - login window + registration with server
