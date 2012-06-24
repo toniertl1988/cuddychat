@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Windows.Media.Imaging;
 using System.Text.RegularExpressions;
+using System.Windows.Threading;
 
 namespace Client
 {
@@ -31,36 +32,31 @@ namespace Client
 	/// </summary>
 	public partial class Window1 : Window
 	{
-		private string UserName = "Unknown";
-		private StreamWriter swSender;
-		private StreamReader srReceiver;
-		private TcpClient tcpServer;
+
 		// Needed to update the form with messages from another thread
 		private delegate void UpdateLogCallback(string strMessage);
 		// Needed to set the form to a "disconnected" state from another thread
 		private delegate void CloseConnectionCallback(string strReason);
-		private Thread thrMessaging;
-		private IPAddress ipAddr;
-		private bool Connected;
-		
-		private static readonly Regex regexSmilies = new Regex(@":[-]{0,1}[)|D]");
 		
 		private Smiley _smileys = new Smiley();
+		
+		private ChatClient _client;
 		
 		public Window1()
 		{
 			InitializeComponent();
 			txtLog.Document.Blocks.Clear();
-			//StatusBarText.Text = _smileys.getRegex();
+			_client = new ChatClient();
+			ChatClient.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
 		}
 		
 		private void btnConnect_Click(object sender, EventArgs e)
 		{
-			if (Connected == false)
+			if (_client.connected == false)
 			{
 				if (txtUser.Text.Length != 0 && txtIp.Text.Length != 0)
 				{
-					InitializeConnection();
+					_client.InitializeConnection(txtIp.Text, txtUser.Text);
 					btnConnect.Content = "Disconnect";
 					txtIp.IsEnabled = false;
 					txtUser.IsEnabled = false;
@@ -75,50 +71,24 @@ namespace Client
 				btnConnect.Content = "Connect";
 				txtIp.IsEnabled = true;
 				txtUser.IsEnabled = true;
-				CloseConnection("Disconnected at user's request.");
+				_client.closeConnection("Disconnected at user's request.");
 			}
 		}
 		
-		private void InitializeConnection()
+		private void UpdateGui(string strMessage)
 		{
-			ipAddr = IPAddress.Parse(txtIp.Text);
-			tcpServer = new TcpClient();
-			tcpServer.Connect(ipAddr, 8118);
-			Connected = true;
-			UserName = txtUser.Text;
-			swSender = new StreamWriter(tcpServer.GetStream());
-			swSender.WriteLine(txtUser.Text);
-			swSender.Flush();
-			thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
-			thrMessaging.IsBackground = true;
-			thrMessaging.Start();
-		}
-		
-		private void ReceiveMessages()
-		{
-			srReceiver = new StreamReader(tcpServer.GetStream());
-			String ConResponse = srReceiver.ReadLine();
-			
-			if (ConResponse[0] == '1')
+			if (_client.connected == true)
 			{
-				this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateLog), new object[] { "Connected Successfully!" });
+				btnConnect.Content = "Disconnect";
+				txtIp.IsEnabled = false;
+				txtUser.IsEnabled = false;
 			}
 			else
 			{
-				string Reason = "Not Connected!";
-				Reason += ConResponse.Substring(2, ConResponse.Length-2);
-				this.Dispatcher.Invoke(new CloseConnectionCallback(this.CloseConnection), new object[] { Reason });
-				return;
+				btnConnect.Content = "Connect";
+				txtIp.IsEnabled = true;
+				txtUser.IsEnabled = true;				
 			}
-			
-			while (Connected)
-			{
-				this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateLog), new object[] { srReceiver.ReadLine() });
-			}
-		}
-		
-		private void UpdateLog(string strMessage)
-		{
 			if (strMessage.Length != 0)
 			{
 				Paragraph p = new Paragraph();
@@ -151,36 +121,15 @@ namespace Client
 		
 		private void SendMessage()
 		{
-			swSender.WriteLine(txtMessage.Text);
-			swSender.Flush();
+			_client.sendMessage(txtMessage.Text);
 			txtMessage.Text = "";
 			txtMessage.Focus();
 		}
 		
-		private void CloseConnection(string Reason)
-		{
-			UpdateLog(Reason);
-			Connected = false;
-			if (thrMessaging != null) {
-				thrMessaging.Abort();
-			}
-			if (swSender != null) {
-				swSender.Close();
-			}
-			if (srReceiver != null)
-			{
-				srReceiver.Close();
-			}
-			if (tcpServer != null)
-			{
-				tcpServer.Close();
-			}
-		}
-		
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-        	if (tcpServer != null) {
-        		CloseConnection("Disconnect");
+        	if (_client.getTcpServer() != null) {
+        		_client.closeConnection("Disconnect");
         	}
         }
         
@@ -191,8 +140,8 @@ namespace Client
     	
     	public void closeApplication(object sender, EventArgs e)
     	{
-        	if (tcpServer != null) {
-        		CloseConnection("Disconnect");
+    		if (_client.getTcpServer() != null) {
+        		_client.closeConnection("Disconnect");
         	}
     		Application.Current.Shutdown();
     	}
@@ -202,5 +151,11 @@ namespace Client
     		SmileyWindow window = new SmileyWindow(_smileys);
     		window.Show();
     	}
+    	
+		public void mainServer_StatusChanged(object sender, StatusChangedEventArgs e)
+		{
+    		// Call the method that updates the form
+    		this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateGui), new object[] { e.EventMessage });
+		}
 	}
 }

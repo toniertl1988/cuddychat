@@ -1,8 +1,33 @@
 ﻿<Window x:Class="Client.SmileyWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:s="clr-namespace:Client"
 	Title="Alle Smileys anzeigen" Height="300" Width="300">
 	<Grid>
-		
+		<Grid.Resources>
+			<s:Smiley x:Key="myDataSource" />
+		</Grid.Resources>
+		<Grid.DataContext>
+			<Binding Source="{StaticResource myDataSource}" />
+		</Grid.DataContext>
+		<DataGrid Name="smileyGrid">
+		   <DataGrid.Columns>
+		    <DataGridTextColumn 
+		       Binding="{Binding Path=code}" 
+		                         Header="Code" IsReadOnly="True">
+		   </DataGridTextColumn>
+		    <DataGridTextColumn 
+		       Binding="{Binding Path=image}" 
+		                         Header="Filename" IsReadOnly="True">
+		   </DataGridTextColumn>
+		   <DataGridTemplateColumn Header="Smiley" IsReadOnly="True">
+		   		<DataGridTemplateColumn.CellTemplate>
+		   			<DataTemplate>
+	   					<Image Source="smileys\{Binding Path=image}" />
+		   			</DataTemplate>
+		   		</DataGridTemplateColumn.CellTemplate>
+		   </DataGridTemplateColumn>
+		  </DataGrid.Columns>
+		 </DataGrid>
 	</Grid>
 </Window>

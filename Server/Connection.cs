@@ -29,6 +29,8 @@ namespace Server
 		private string currUser;
 		private string strResponse;
 		
+		private string _acceptedSignature = "C0dd1Ch2tCli3nt";
+		
 		public Connection(TcpClient tcpCon)
 		{
 			tcpClient = tcpCon;
@@ -48,9 +50,18 @@ namespace Server
 			srReceiver = new System.IO.StreamReader(tcpClient.GetStream());
 			swSender = new System.IO.StreamWriter(tcpClient.GetStream());
 			currUser = srReceiver.ReadLine();
+			int pos = currUser.IndexOf(_acceptedSignature, 0);
+			currUser = currUser.Replace(_acceptedSignature + "_", "");
 			if (currUser != "")
 			{
-				if (ChatServer.htUsers.Contains(currUser) == true)
+				if (pos == -1)
+				{
+					swSender.WriteLine("0|Wrong Client.");
+					swSender.Flush();
+					CloseConnection();
+					return;
+				}
+				else if (ChatServer.htUsers.Contains(currUser) == true)
 				{
 					swSender.WriteLine("0|This username already exists.");
 					swSender.Flush();

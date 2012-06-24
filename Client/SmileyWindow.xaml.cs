@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
+using System.Collections;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -23,9 +24,19 @@ namespace Client
 	/// </summary>
 	public partial class SmileyWindow : Window
 	{		
+		public struct MyData
+		{
+			public string code { set; get; }
+			public string image { set; get; }
+		}
+		
 		public SmileyWindow(Smiley smileyclass)
 		{
 			InitializeComponent();
+			Hashtable smileys = smileyclass.getAllSmileys();
+			foreach (var element in smileys.Keys) {
+				smileyGrid.Items.Add(new MyData() {code = (string)element, image = (string)smileys[element]});
+			}
 		}
 	}
 }

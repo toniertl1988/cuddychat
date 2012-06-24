@@ -92,5 +92,10 @@ namespace Client
     		}
     		return p;
 		}
+		
+		public Hashtable getAllSmileys()
+		{
+			return _fixSmileys;
+		}
 	}
 }
