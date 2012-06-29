@@ -11,8 +11,10 @@ using System.IO;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Threading;
+using System.Security.Cryptography;
 
 namespace Client
 {
@@ -36,24 +38,68 @@ namespace Client
 		private TcpClient _tcpServer;
 		
 		private Thread _thrMessaging;
+		
+		private Encryption _serverKey;
+		
+		private Encryption _self;
 				
 		public static event StatusChangedEventHandler StatusChanged;
 		private static StatusChangedEventArgs e;
 		
 		public ChatClient()
 		{
+			_self = new Encryption();
 		}
 		
 		public void InitializeConnection(string IP, string User)
 		{
 			_ipAddr = IPAddress.Parse(IP);
+			
 			// Check if IP is reachable
-			_tcpServer = new TcpClient();
-			//_tcpServer.ReceiveTimeout = 2000;
-			//_tcpServer.SendTimeout = 2000;
-			_tcpServer.Connect(_ipAddr, _port);
+			bool check = checkIfServerIsReachable();
+			
+			if (check == false)
+			{
+				throw new Exception("Server ist zur Zeit nicht erreichbar!");
+			}
+			
+			// erstmal verbinden
+			try {
+				_tcpServer = new TcpClient();
+				_tcpServer.Connect(_ipAddr, _port);
+			}
+			catch (Exception)
+			{
+				_tcpServer = null;
+				throw new Exception("Server ist zur Zeit nicht erreichbar! (Antwortet nicht auf Anfragen)");
+			}
+			
 			_swSender = new StreamWriter(_tcpServer.GetStream());
-			_swSender.WriteLine(_signature + "_" + User);
+			_srReceiver = new StreamReader(_tcpServer.GetStream());
+			
+			// laenge vom public key empfangen
+			Int32 msgLength = Convert.ToInt32(_srReceiver.ReadLine());
+			// server public key empfangen
+			char[] response = new char[msgLength];
+			_srReceiver.Read(response, 0, msgLength);
+			string xmlString = new String(response);
+			// Encryption Klasse mit Public Key vom Server füttern
+			_serverKey = new Encryption(xmlString);
+			
+			// laenge von meinem public key senden
+			char[] publicKey = _self.getPublicKey().ToCharArray();
+			_swSender.WriteLine(publicKey.Length);
+			_swSender.Flush();
+			// meinen public key senden
+			_swSender.Write(publicKey, 0, publicKey.Length);
+			_swSender.Flush();
+			
+			// mit dem empfangenem server key meinen benutzernamen an server senden
+			string msg = _signature + "_" + User;
+			char[] sendmessage = _serverKey.EncryptOutgoing(msg);
+			_swSender.WriteLine(sendmessage.Length);
+			_swSender.Flush();
+			_swSender.Write(sendmessage, 0, sendmessage.Length);
 			_swSender.Flush();
 			_thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
 			_thrMessaging.IsBackground = true;
@@ -72,8 +118,11 @@ namespace Client
 		
 		private void ReceiveMessages()
 		{
-			_srReceiver = new StreamReader(_tcpServer.GetStream());
-			String ConResponse = _srReceiver.ReadLine();
+			//_srReceiver = new StreamReader(_tcpServer.GetStream());
+			Int32 messageLength = Convert.ToInt32(_srReceiver.ReadLine());
+			char[] response = new char[messageLength];
+			_srReceiver.Read(response, 0, messageLength);
+			String ConResponse = _self.DecryptIncoming(new string(response));
 			
 			if (ConResponse[0] == '1')
 			{
@@ -92,7 +141,10 @@ namespace Client
 			
 			while (connected)
 			{
-				e = new StatusChangedEventArgs(_srReceiver.ReadLine());
+				messageLength = Convert.ToInt16(_srReceiver.ReadLine());
+				response = new char[messageLength];
+				_srReceiver.Read(response, 0, messageLength);
+				e = new StatusChangedEventArgs(_self.DecryptIncoming(new string(response)));
 				OnStatusChanged(e);
 			}
 		}
@@ -100,33 +152,58 @@ namespace Client
 		public void closeConnection(string Reason)
 		{
 			connected = false;
+			sendMessage("ClosingChatServerConnectionRequest");
 			e = new StatusChangedEventArgs(Reason);
 			OnStatusChanged(e);
 			if (_thrMessaging != null) {
-				_thrMessaging.Abort();
+				//_thrMessaging.Abort();
 			}
 			if (_swSender != null) {
-				_swSender.Close();
+				//_swSender.Close();
 			}
 			if (_srReceiver != null)
 			{
-				_srReceiver.Close();
+				//_srReceiver.Close();
 			}
 			if (_tcpServer != null)
 			{
-				_tcpServer.Close();
+				//_tcpServer.Close();
 			}
 		}
 		
 		public void sendMessage(string message)
 		{
-			_swSender.WriteLine(message);
+			char[] msg = _serverKey.EncryptOutgoing(message);
+			_swSender.WriteLine(msg.Length);
+			_swSender.Flush();
+			_swSender.Write(msg, 0, msg.Length);
 			_swSender.Flush();
 		}
 		
 		public TcpClient getTcpServer()
 		{
 			return this._tcpServer;
+		}
+		
+		public string getPublicKey()
+		{
+			return _self.getPublicKey();
+		}
+		
+		public bool checkIfServerIsReachable()
+		{
+			Ping pingSender = new Ping ();
+            PingOptions options = new PingOptions ();
+            options.DontFragment = true;
+            string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            byte[] buffer = System.Text.Encoding.ASCII.GetBytes (data);
+            int timeout = 120;
+            PingReply reply = pingSender.Send (_ipAddr, timeout, buffer, options);
+            if (reply.Status == IPStatus.Success)
+            {
+            	return true;
+            }
+            return false;
 		}
 	}
 }

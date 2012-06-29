@@ -56,10 +56,14 @@
 				</MenuItem>
 			</MenuItem>
 		</Menu>
-		<StatusBar DockPanel.Dock="Bottom">
-            <TextBlock Text="Statuszeile" Name="StatusBarText"/>
-        </StatusBar>
-		<Grid>
+		<StatusBar
+			DockPanel.Dock="Bottom">
+			<TextBlock
+				Text="Statuszeile"
+				Name="StatusBarText" />
+		</StatusBar>
+		<Grid
+			DockPanel.Dock="Top">
 			<Grid.RowDefinitions>
 				<RowDefinition
 					Height="Auto" />
@@ -72,7 +76,10 @@
 				<ColumnDefinition
 					Width="Auto" />
 			</Grid.ColumnDefinitions>
-			<Grid Grid.Column="0" Grid.Row="0" Margin="5">
+			<Grid
+				Grid.Column="0"
+				Grid.Row="0"
+				Margin="5">
 				<Grid.RowDefinitions>
 					<RowDefinition
 						Height="Auto" />
@@ -95,8 +102,7 @@
 					VerticalAlignment="Center"
 					Width="88"
 					Height="25"
-					Margin="3"
-				/>
+					Margin="3" />
 				<Label
 					Content="Username:"
 					Grid.Column="0"
@@ -105,8 +111,7 @@
 					VerticalAlignment="Center"
 					Width="88"
 					Height="25"
-					Margin="3"
-				/>
+					Margin="3" />
 				<TextBox
 					Name="txtIp"
 					Grid.Column="1"
@@ -124,9 +129,8 @@
 					HorizontalAlignment="Left"
 					VerticalAlignment="Top"
 					Width="150"
-					Height="25" 
-					Margin="3"
-				/>
+					Height="25"
+					Margin="3" />
 				<Button
 					Name="btnConnect"
 					Grid.Column="2"
@@ -139,7 +143,11 @@
 					Content="Connect"
 					Click="btnConnect_Click" />
 			</Grid>
-			<Grid Grid.Column="0" Grid.Row="1" Margin="5">
+			<Grid
+				Name="Main"
+				Grid.Column="0"
+				Grid.Row="1"
+				Margin="5">
 				<Grid.RowDefinitions>
 					<RowDefinition
 						Height="Auto" />
@@ -150,16 +158,20 @@
 				</Grid.ColumnDefinitions>
 				<RichTextBox
 					Name="txtLog"
-					VerticalScrollBarVisibility="Visible"
 					Width="340"
+					VerticalScrollBarVisibility="Visible"
 					VerticalAlignment="Top"
 					HorizontalAlignment="Left"
 					Grid.Row="0"
 					Grid.Column="0"
 					Margin="3"
-					Height="300" />
+					Height="300"
+					IsReadOnly="False" />
 			</Grid>
-			<Grid Grid.Column="0" Grid.Row="2" Margin="5">
+			<Grid
+				Grid.Column="0"
+				Grid.Row="2"
+				Margin="5">
 				<Grid.RowDefinitions>
 					<RowDefinition
 						Height="Auto" />
@@ -181,7 +193,7 @@
 					HorizontalAlignment="Left"
 					Grid.Row="0"
 					Grid.Column="0" />
-                <Button
+				<Button
 					Name="btnSend"
 					Grid.Column="1"
 					Grid.Row="0"
@@ -192,7 +204,7 @@
 					Height="31"
 					Content="Send"
 					Click="btnSend_Click" />
-            </Grid>
+			</Grid>
 		</Grid>
 	</DockPanel>
 </Window>

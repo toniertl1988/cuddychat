@@ -14,6 +14,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Collections;
+using System.Security.Cryptography;
 
 namespace Server
 {
@@ -26,6 +27,7 @@ namespace Server
 		
 		public static Hashtable htUsers = new Hashtable(30);
 		public static Hashtable htConnections = new Hashtable(30);
+		public static Hashtable htEncryptions = new Hashtable(30);
 		private IPAddress ipAddress;
 		private TcpClient tcpClient;
 		public static event StatusChangedEventHandler StatusChanged;
@@ -35,10 +37,13 @@ namespace Server
 		private TcpListener tlsClient;
 		bool ServRunning = false;
 		
+		private Encryption _self;
+		
 		private string _selfIpAddress = "";
 		
 		public ChatServer()
 		{
+			_self = new Encryption();
 			findSelfIpAddress();
 		}
 		
@@ -51,10 +56,11 @@ namespace Server
 			}
 		}
 				
-		public static void AddUser(TcpClient tcpUser, string strUsername)
+		public static void AddUser(TcpClient tcpUser, string strUsername, string publicKey)
 		{
 			ChatServer.htUsers.Add(strUsername, tcpUser);
 			ChatServer.htConnections.Add(tcpUser, strUsername);
+			ChatServer.htEncryptions.Add(tcpUser, new Encryption(publicKey));
 			SendAdminMessage(htConnections[tcpUser] + " has joined us");
 		}
 		
@@ -64,6 +70,7 @@ namespace Server
 			{
 				SendAdminMessage(htConnections[tcpUser] + " has left us");
 				ChatServer.htUsers.Remove(ChatServer.htConnections[tcpUser]);
+				ChatServer.htEncryptions.Remove(htConnections[tcpUser]);
 				ChatServer.htConnections.Remove(tcpUser);
 			}
 		}
@@ -79,23 +86,29 @@ namespace Server
 		
 		public static void SendAdminMessage(string Message)
 		{
-			StreamWriter swSenderSender;
-			e = new StatusChangedEventArgs("Administrator: " + Message);
+			StreamWriter swSender;
+			e = new StatusChangedEventArgs("Adminisdestrator: " + Message);
 			OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
 			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
+			string message = "";
 			for (int i = 0; i < tcpClients.Length; i++)
 			{
 				try
 				{
+					Encryption client = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
 					if (Message.Trim() == "" || tcpClients[i] == null)
 					{
 						continue;
 					}
-					swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-					swSenderSender.WriteLine("Administrator: " + Message);
-					swSenderSender.Flush();
-					swSenderSender = null;
+					swSender = new StreamWriter(tcpClients[i].GetStream());
+					message = "Administrator: " + Message;
+					char[] sendMessage = client.EncryptOutgoing(message);
+					swSender.WriteLine(sendMessage.Length);
+					swSender.Flush();
+					swSender.Write(sendMessage, 0, sendMessage.Length);
+					swSender.Flush();
+					swSender = null;
 				}
 				catch
 				{
@@ -106,11 +119,12 @@ namespace Server
 		
 		public static void SendMessage(string From, string Message)
 		{
-			StreamWriter swSenderSender;
+			StreamWriter swSender;
 			e = new StatusChangedEventArgs(From + " says: " + Message);
-			//OnStatusChanged(e);
+			OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
 			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
+			string message = "";
 			for (int i = 0; i < tcpClients.Length; i++)
 			{
 				try
@@ -121,10 +135,15 @@ namespace Server
 					}
 					else
 					{
-						swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-		                swSenderSender.WriteLine(From + " says: " + Message);
-		                swSenderSender.Flush();
-		                swSenderSender = null;
+						Encryption client = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
+						swSender = new StreamWriter(tcpClients[i].GetStream());
+						message = From + " says: " + Message;
+						char[] sendMessage = client.EncryptOutgoing(message);
+						swSender.WriteLine(sendMessage.Length);
+						swSender.Flush();
+						swSender.Write(sendMessage, 0, sendMessage.Length);
+						swSender.Flush();
+						swSender = null;
 					}
 				}
 				catch
@@ -154,7 +173,7 @@ namespace Server
 			while (ServRunning == true)
 			{
 				tcpClient = tlsClient.AcceptTcpClient();
-				Connection newConnection = new Connection(tcpClient);
+				Connection newConnection = new Connection(tcpClient, _self);
 			}
 		}
 		
@@ -219,6 +238,11 @@ namespace Server
         ~ChatServer()
         {
         	Dispose (false);
+        }
+        
+        public string getRSAPublic()
+        {
+        	return _self.getPublicKey();
         }
 	}
 }

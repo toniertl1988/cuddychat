@@ -4,30 +4,19 @@
     xmlns:s="clr-namespace:Client"
 	Title="Alle Smileys anzeigen" Height="300" Width="300">
 	<Grid>
-		<Grid.Resources>
-			<s:Smiley x:Key="myDataSource" />
-		</Grid.Resources>
-		<Grid.DataContext>
-			<Binding Source="{StaticResource myDataSource}" />
-		</Grid.DataContext>
-		<DataGrid Name="smileyGrid">
-		   <DataGrid.Columns>
-		    <DataGridTextColumn 
-		       Binding="{Binding Path=code}" 
-		                         Header="Code" IsReadOnly="True">
-		   </DataGridTextColumn>
-		    <DataGridTextColumn 
-		       Binding="{Binding Path=image}" 
-		                         Header="Filename" IsReadOnly="True">
-		   </DataGridTextColumn>
-		   <DataGridTemplateColumn Header="Smiley" IsReadOnly="True">
-		   		<DataGridTemplateColumn.CellTemplate>
-		   			<DataTemplate>
-	   					<Image Source="smileys\{Binding Path=image}" />
-		   			</DataTemplate>
-		   		</DataGridTemplateColumn.CellTemplate>
-		   </DataGridTemplateColumn>
-		  </DataGrid.Columns>
-		 </DataGrid>
+		<DataGrid Name="smileyGrid" ItemsSource="{Binding}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn 
+                    Binding="{Binding Path=code}" 
+                    Header="Code" IsReadOnly="True" />
+                <DataGridTemplateColumn Header="Smiley" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Path=image}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 	</Grid>
 </Window>

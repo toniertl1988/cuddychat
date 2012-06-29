@@ -7,6 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -34,9 +35,16 @@ namespace Client
 		{
 			InitializeComponent();
 			Hashtable smileys = smileyclass.getAllSmileys();
+			List<MyData> smilieData = new List<MyData>();
 			foreach (var element in smileys.Keys) {
-				smileyGrid.Items.Add(new MyData() {code = (string)element, image = (string)smileys[element]});
+                smilieData.Add(new MyData() 
+                    { 
+                        code = (string)element, 
+                        image = Path.GetFullPath(@"smileys/" + (string)smileys[element])
+                    }
+                );
 			}
+		 	smileyGrid.DataContext = smilieData;
 		}
 	}
 }

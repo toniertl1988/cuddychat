@@ -39,6 +39,7 @@ namespace Server
 			mainServer = new ChatServer();
 			txtIp.Text = mainServer.getSelfIpAddress();
 			ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
+			//txtLog.AppendText(mainServer.getRSAPublic());
 		}
 		
 		private void btnListen_Click(object sender, EventArgs e)

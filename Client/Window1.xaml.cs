@@ -131,6 +131,7 @@ namespace Client
         	if (_client.getTcpServer() != null) {
         		_client.closeConnection("Disconnect");
         	}
+        	Application.Current.Shutdown();
         }
         
     	private static void OnUrlClick(object sender, RoutedEventArgs e)
