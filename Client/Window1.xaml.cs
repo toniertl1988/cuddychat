@@ -93,6 +93,8 @@ namespace Client
 			{
 				Paragraph p = new Paragraph();
 				p.LineHeight = 1;
+				DateTime today = DateTime.Now;
+				p.Inlines.Add("(" + today.ToString("HH:mm:ss") + ") ");
 				p = _smileys.insertSmileys(p, strMessage);
 				txtLog.Document.Blocks.Add(p);
 				txtLog.ScrollToEnd();

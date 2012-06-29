@@ -39,7 +39,6 @@ namespace Server
 			mainServer = new ChatServer();
 			txtIp.Text = mainServer.getSelfIpAddress();
 			ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
-			//txtLog.AppendText(mainServer.getRSAPublic());
 		}
 		
 		private void btnListen_Click(object sender, EventArgs e)
@@ -50,7 +49,7 @@ namespace Server
 				if (mainServer.StartListening() == false) {
 					MessageBox.Show("Server konnte nicht gestartet werden!");
 				} else {
-					txtLog.AppendText("Monitoring for connections...\r");
+					this.UpdateStatus("Monitoring for connections...");
 					btnListen.Content = "Stop Listening";
 					txtIp.IsEnabled = false;
 				}
@@ -59,7 +58,7 @@ namespace Server
 			{
 				mainServer.StopListening();
 				btnListen.Content = "Start Listening";
-				txtLog.AppendText("Stop Monitoring\r");
+				this.UpdateStatus("Stop Monitoring");
 				txtIp.IsEnabled = true;
 			}
 		}
@@ -73,7 +72,9 @@ namespace Server
 		private void UpdateStatus(string strMessage)
 		{
 			// Updates the log with the message
-			txtLog.AppendText(strMessage + "\r");
+			DateTime today = DateTime.Now;
+			
+			txtLog.AppendText("(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r");
 			txtLog.ScrollToEnd();
 		}
 

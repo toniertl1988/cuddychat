@@ -70,10 +70,5 @@ namespace Server
 		{
 			publicKey.FromXmlString(xmlString);
 		}
-		
-		public string getRealPublicKey()
-		{
-			return publicKey.ToXmlString(false);
-		}
 	}
 }

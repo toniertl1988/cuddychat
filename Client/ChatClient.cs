@@ -118,7 +118,6 @@ namespace Client
 		
 		private void ReceiveMessages()
 		{
-			//_srReceiver = new StreamReader(_tcpServer.GetStream());
 			Int32 messageLength = Convert.ToInt32(_srReceiver.ReadLine());
 			char[] response = new char[messageLength];
 			_srReceiver.Read(response, 0, messageLength);
