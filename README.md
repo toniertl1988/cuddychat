@@ -16,7 +16,8 @@ History
 
 Roadmap
 ======
-- Version 1.1.5 - add smiley window
-- Version 1.1.6 - dynamic smiley add and parsing
+- Version 1.1.5 - third security option -> encr+decr messages over cryptostream -> length "unlimited", RSA only on server
+- Version 1.1.6 - add smiley window
+- Version 1.1.7 - dynamic smiley add and parsing
 
 - Version 1.2 - login window + registration with server
