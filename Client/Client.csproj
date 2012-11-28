@@ -84,5 +84,17 @@
     <Page Include="SmileyWindow.xaml" />
     <Page Include="Window1.xaml" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Smileys" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Smileys\laugh.gif" />
+    <Resource Include="Smileys\sad.gif" />
+    <Resource Include="Smileys\smile.gif" />
+    <Resource Include="Smileys\wink.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Smileys\asia.gif" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>

@@ -43,7 +43,7 @@ namespace Client
 			_fixSmileys.Add(":-(", "sad.gif");
 			_fixSmileys.Add(";)", "wink.gif");
 			_fixSmileys.Add(";-)", "wink.gif");
-            _fixSmileys.Add("310", "310.gif");
+			_fixSmileys.Add(":asia:", "asia.gif");
 		}
 		
 		public void buildFixSmileysRegex()
@@ -69,7 +69,7 @@ namespace Client
 					p.Inlines.Add(text.Substring(lastPos, match.Index - lastPos));
 	                // Bild hinzufugen falls vorhanden
             		try {
-	                	BitmapImage bitmapSmiley = new BitmapImage(new Uri("smileys/" + (string)_fixSmileys[match.Value], UriKind.Relative));
+	                	BitmapImage bitmapSmiley = new BitmapImage(new Uri("pack://application:,,,/Smileys/" + (string)_fixSmileys[match.Value]) );
                 		System.Windows.Controls.Image smiley = new System.Windows.Controls.Image();
                 		smiley.Source = bitmapSmiley;
                         smiley.Width = bitmapSmiley.Width;

@@ -28,7 +28,7 @@ namespace Client
 		public struct MyData
 		{
 			public string code { set; get; }
-			public string image { set; get; }
+			public System.Uri image { set; get; }
 		}
 		
 		public SmileyWindow(Smiley smileyclass)
@@ -40,7 +40,7 @@ namespace Client
                 smilieData.Add(new MyData() 
                     { 
                         code = (string)element, 
-                        image = Path.GetFullPath(@"smileys/" + (string)smileys[element])
+                        image = new Uri("pack://application:,,,/Smileys/" + (string)smileys[element])
                     }
                 );
 			}
