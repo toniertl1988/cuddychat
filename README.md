@@ -16,8 +16,10 @@ History
 
 Roadmap
 ======
-- Version 1.1.5 - third security option -> encr+decr messages over cryptostream -> length "unlimited", RSA only on server
-- Version 1.1.6 - add smiley window
-- Version 1.1.7 - dynamic smiley add and parsing
+- version 1.1.5 - fix insertion of standard smileys in binary
+- version 1.1.6 - send and receive messages over serialized message class over binary stream
+- Version 1.1.7 - third security option -> encr+decr messages over cryptostream -> length "unlimited", RSA only on server
+- Version 1.1.8 - add smiley window
+- Version 1.1.9 - dynamic smiley add and parsing
 
 - Version 1.2 - login window + registration with server
