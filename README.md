@@ -13,12 +13,12 @@ History
 - Version 1.1.3 - released - second security option -> encrypted and decrypted messages over socket connection -> length of messages is limited to 80
 - Version 1.1.4 - released - show incoming time from message (HH:ii:ss)
 - version 1.1.5 - released - fix insertion of standard smileys in binary
+- version 1.1.6 - released - send and receive messages over binarystream with rsa + rijndael - security level high enough atm
 
 
 Roadmap
 ======
-- version 1.1.6 - send and receive messages over serialized message class over binary stream
-- Version 1.1.7 - third security option -> encr+decr messages over cryptostream -> length "unlimited", RSA only on server
+- version 1.1.7 - parsing of hyperlinks
 - Version 1.1.8 - add smiley window
 - Version 1.1.9 - dynamic smiley add and parsing
 
