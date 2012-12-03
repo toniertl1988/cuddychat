@@ -18,8 +18,10 @@ History
 
 Roadmap
 ======
-- version 1.1.7 - parsing of hyperlinks
-- Version 1.1.8 - add smiley window
-- Version 1.1.9 - dynamic smiley add and parsing
+- version 1.1.7 - parsing of hyperlinks in client
+- version 1.1.8 - single instance of server
+- version 1.1.9 - single instance of client
+- Version 1.1.10 - add smiley window
+- Version 1.1.11 - dynamic smiley add and parsing
 
 - Version 1.2 - login window + registration with server
