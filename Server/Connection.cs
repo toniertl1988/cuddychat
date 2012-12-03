@@ -24,8 +24,8 @@ namespace Server
 	{
 		TcpClient tcpClient;
 		private Thread thrSender;
-		private StreamReader srReceiver;
-		private StreamWriter swSender;
+		private BinaryReader srReceiver;
+		private BinaryWriter swSender;
 		private string currUser;
 		private string strResponse;
 		
@@ -50,68 +50,50 @@ namespace Server
 		
 		private void AcceptClient()
 		{
-			srReceiver = new System.IO.StreamReader(tcpClient.GetStream());
-			swSender = new System.IO.StreamWriter(tcpClient.GetStream());
+			srReceiver = new System.IO.BinaryReader(tcpClient.GetStream());
+			swSender = new System.IO.BinaryWriter(tcpClient.GetStream());
 			
-			char[] response;
-			// sende als zeile die länge vom public key
-			string publicKey =  _self.getPublicKey();
-			char[] ServerPublicKey = publicKey.ToCharArray();
-			swSender.WriteLine(ServerPublicKey.Length);
+			byte[] answer;
+			byte[] response;
+			Int32 length;
+			// lese laenge von pub key von client
+			length = srReceiver.ReadInt32();
+			// empfange client pub key
+			response = new byte[length];
+			response = srReceiver.ReadBytes(length);
+			string clientPubKey = Converter.fromByteArrayToString(response);
+			Encryption clientEncryption = new Encryption(clientPubKey);
+			
+			// sende mit client pub key verschlüsselt rij key + iv
+			answer = clientEncryption.EncryptRSA(_self.getRijKey());
+			swSender.Write(answer.Length);
 			swSender.Flush();
-			// sende server public key
-			swSender.Write(ServerPublicKey, 0, ServerPublicKey.Length);
+			swSender.Write(answer);
+			swSender.Flush();
+			answer = clientEncryption.EncryptRSA(_self.getRijIV());
+			swSender.Write(answer.Length);
+			swSender.Flush();
+			swSender.Write(answer);
 			swSender.Flush();
 			
-			Int32 messageLength = new Int32();
+			// empfange mit rij verschlüsselten usernamen vom client
+			length = srReceiver.ReadInt32();
+			response = new byte[length];
+			response = srReceiver.ReadBytes(length);
 			
-			// empfange laenge client publiy key
-			try {
-				 messageLength = Convert.ToInt32(srReceiver.ReadLine());
-			} catch (Exception) {
-				swSender.WriteLine("Ungültiger Rückgabewert!");
-				swSender.Flush();
-				CloseConnection();
-				return;
-			}
-			
-			// empfange client puclic key
-			response = new char[messageLength];
-			srReceiver.Read(response, 0, messageLength);
-			
-			string ClientPublicKey = new string(response);
-			
-			
-			// laenge auslesen
-			try {
-				messageLength = Convert.ToInt32(srReceiver.ReadLine());
-			} catch (Exception) {
-				swSender.WriteLine("Ungültiger Rückgabewert!");
-				swSender.Flush();
-				CloseConnection();
-				return;
-			}
-			// mit server public key verschlüsselten Usernamen auslesen
-			response = new char[messageLength];
-			srReceiver.Read(response, 0, messageLength);
-			try {
-				currUser = _self.DecryptIncoming(new string(response));
-			} catch (Exception) {
-				swSender.WriteLine("Ungültiger Rückgabewert!");
-				swSender.Flush();
-				CloseConnection();
-				return;
-			}
+			currUser = Converter.fromByteArrayToString(_self.DecryptRijndael(response));
 			int pos = currUser.IndexOf(_acceptedSignature, 0);
 			currUser = currUser.Replace(_acceptedSignature + "_", "");
 			if (currUser != "")
 			{
-				Encryption clientEncryption = new Encryption(ClientPublicKey);
 				string message = "";
 				if (pos == -1)
 				{
 					message = "0|Wrong Client.";
-					swSender.Write(clientEncryption.EncryptOutgoing(message), 0, message.Length);
+					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					swSender.Write(msg.Length);
+					swSender.Flush();
+					swSender.Write(msg);
 					swSender.Flush();
 					CloseConnection();
 					return;
@@ -119,10 +101,10 @@ namespace Server
 				else if (ChatServer.htUsers.Contains(currUser) == true)
 				{
 					message = "0|This username already exists.";
-					char[] encrMessage = clientEncryption.EncryptOutgoing(message);
-					swSender.WriteLine(encrMessage.Length);
+					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					swSender.Write(msg.Length);
 					swSender.Flush();
-					swSender.Write(encrMessage, 0, encrMessage.Length);
+					swSender.Write(msg);
 					swSender.Flush();
 					CloseConnection();
 					return;
@@ -130,10 +112,10 @@ namespace Server
 				else if (currUser == "Administrator")
 				{
 					message = "0|This username is reserved.";
-					char[] encrMessage = clientEncryption.EncryptOutgoing(message);
-					swSender.WriteLine(encrMessage.Length);
+					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					swSender.Write(msg.Length);
 					swSender.Flush();
-					swSender.Write(encrMessage, 0, encrMessage.Length);
+					swSender.Write(msg);
 					swSender.Flush();
 					CloseConnection();
 					return;
@@ -141,12 +123,12 @@ namespace Server
 				else
 				{
 					message = "1";
-					char[] encrMessage = clientEncryption.EncryptOutgoing(message);
-					swSender.WriteLine(encrMessage.Length);
+					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					swSender.Write(msg.Length);
 					swSender.Flush();
-					swSender.Write(encrMessage, 0, encrMessage.Length);
+					swSender.Write(msg, 0, msg.Length);
 					swSender.Flush();
-					ChatServer.AddUser(tcpClient, currUser, ClientPublicKey);
+					ChatServer.AddUser(tcpClient, currUser, _self);
 				}
 			}
 			else
@@ -157,17 +139,17 @@ namespace Server
 			
 			try
 			{
-				while ((strResponse = srReceiver.ReadLine()) != "")
+				while ((length = Convert.ToInt32(srReceiver.ReadInt32())) != 0)
 				{
-					 messageLength = Convert.ToInt32(strResponse);
-      				 response = new char[messageLength];
-					 srReceiver.Read(response, 0, messageLength);
-					 strResponse = _self.DecryptIncoming(new string(response));
+      				 response = new byte[length];
+					 response = srReceiver.ReadBytes(length);
+					 strResponse = Converter.fromByteArrayToString(_self.DecryptRijndael(response));
 					 
 					 if (strResponse == null)
 					 {
 					     ChatServer.RemoveUser(tcpClient);
 					 }
+					 
 					 else if (strResponse == "ClosingChatServerConnectionRequest")
 					 {
 					 	ChatServer.RemoveUser(tcpClient);

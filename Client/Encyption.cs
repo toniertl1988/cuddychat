@@ -13,6 +13,8 @@ using System.Security.Cryptography;
 using System.IO;
 using System.ComponentModel;
 using System.Collections;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Client
 {
@@ -23,6 +25,9 @@ namespace Client
 	{
 		RSACryptoServiceProvider publicKey;
 		RSACryptoServiceProvider privateKey;
+		private Rijndael _rijndael;
+		private ICryptoTransform _rijEncryptor;
+		private ICryptoTransform _rijDecryptor;
 		
 		public Encryption()
 		{
@@ -69,6 +74,38 @@ namespace Client
 		public void setPublicKey(string xmlString)
 		{
 			publicKey.FromXmlString(xmlString);
+		}
+		
+		public void setUpRijndael(byte[] key, byte[] iv)
+		{
+			_rijndael = new RijndaelManaged();
+			_rijndael.Key = key;
+			_rijndael.IV = iv;
+			_rijEncryptor = _rijndael.CreateEncryptor(_rijndael.Key, _rijndael.IV);
+			_rijDecryptor = _rijndael.CreateDecryptor(_rijndael.Key, _rijndael.IV);
+		}
+		
+		public byte[] DecryptRijndael(byte[] incomingMessage)
+		{
+			return CryptRijndael(incomingMessage, _rijDecryptor);
+		}
+		
+		public byte[] EncryptRijndael(byte[] outgoingMessage)
+		{
+			return CryptRijndael(outgoingMessage, _rijEncryptor);
+		}
+		
+		public byte[] CryptRijndael(byte[] data, ICryptoTransform cryptor)
+		{
+			MemoryStream m = new MemoryStream();
+			using (Stream c = new CryptoStream(m, cryptor, CryptoStreamMode.Write))
+				c.Write(data, 0, data.Length);
+			return m.ToArray();
+		}
+		
+		public byte[] DecryptRSA(byte[] data)
+		{
+			return privateKey.Decrypt(data, true);
 		}
 	}
 }

@@ -24,7 +24,6 @@ namespace Server
 	public class ChatServer : IDisposable
 	{
 		private bool disposed = false;
-		
 		public static Hashtable htUsers = new Hashtable(30);
 		public static Hashtable htConnections = new Hashtable(30);
 		public static Hashtable htEncryptions = new Hashtable(30);
@@ -44,6 +43,7 @@ namespace Server
 		public ChatServer()
 		{
 			_self = new Encryption();
+			_self.setUpRijndael();
 			findSelfIpAddress();
 		}
 		
@@ -56,11 +56,11 @@ namespace Server
 			}
 		}
 				
-		public static void AddUser(TcpClient tcpUser, string strUsername, string publicKey)
+		public static void AddUser(TcpClient tcpUser, string strUsername, Encryption encryption)
 		{
 			ChatServer.htUsers.Add(strUsername, tcpUser);
 			ChatServer.htConnections.Add(tcpUser, strUsername);
-			ChatServer.htEncryptions.Add(tcpUser, new Encryption(publicKey));
+			ChatServer.htEncryptions.Add(tcpUser, encryption);
 			SendAdminMessage(htConnections[tcpUser] + " has joined us");
 		}
 		
@@ -86,8 +86,8 @@ namespace Server
 		
 		public static void SendAdminMessage(string Message)
 		{
-			StreamWriter swSender;
-			e = new StatusChangedEventArgs("Adminisdestrator: " + Message);
+			BinaryWriter swSender;
+			e = new StatusChangedEventArgs("Administrator: " + Message);
 			OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
 			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
@@ -96,17 +96,17 @@ namespace Server
 			{
 				try
 				{
-					Encryption client = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
 					if (Message.Trim() == "" || tcpClients[i] == null)
 					{
 						continue;
 					}
-					swSender = new StreamWriter(tcpClients[i].GetStream());
+					Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
+					swSender = new BinaryWriter(tcpClients[i].GetStream());
 					message = "Administrator: " + Message;
-					char[] sendMessage = client.EncryptOutgoing(message);
-					swSender.WriteLine(sendMessage.Length);
+					byte[] sendMessage = tmp.EncryptRijndael(Converter.fromStringToByteArray(message));
+					swSender.Write(sendMessage.Length);
 					swSender.Flush();
-					swSender.Write(sendMessage, 0, sendMessage.Length);
+					swSender.Write(sendMessage);
 					swSender.Flush();
 					swSender = null;
 				}
@@ -119,7 +119,7 @@ namespace Server
 		
 		public static void SendMessage(string From, string Message)
 		{
-			StreamWriter swSender;
+			BinaryWriter swSender;
 			e = new StatusChangedEventArgs(From + " says: " + Message);
 			OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
@@ -135,13 +135,13 @@ namespace Server
 					}
 					else
 					{
-						Encryption client = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
-						swSender = new StreamWriter(tcpClients[i].GetStream());
+						Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
+						swSender = new BinaryWriter(tcpClients[i].GetStream());
 						message = From + " says: " + Message;
-						char[] sendMessage = client.EncryptOutgoing(message);
-						swSender.WriteLine(sendMessage.Length);
+						byte[] sendMessage = tmp.EncryptRijndael(Converter.fromStringToByteArray(message));
+						swSender.Write(sendMessage.Length);
 						swSender.Flush();
-						swSender.Write(sendMessage, 0, sendMessage.Length);
+						swSender.Write(sendMessage);
 						swSender.Flush();
 						swSender = null;
 					}

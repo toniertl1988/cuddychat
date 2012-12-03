@@ -24,8 +24,8 @@ namespace Client
 	public class ChatClient
 	{
 		
-		private StreamWriter _swSender;
-		private StreamReader _srReceiver;
+		private BinaryWriter _swSender;
+		private BinaryReader _srReceiver;
 		
 		public bool connected = false;
 		
@@ -54,6 +54,8 @@ namespace Client
 		public void InitializeConnection(string IP, string User)
 		{
 			_ipAddr = IPAddress.Parse(IP);
+			byte[] response;
+			byte[] answer;
 			
 			// Check if IP is reachable
 			bool check = checkIfServerIsReachable();
@@ -74,33 +76,39 @@ namespace Client
 				throw new Exception("Server ist zur Zeit nicht erreichbar! (Antwortet nicht auf Anfragen)");
 			}
 			
-			_swSender = new StreamWriter(_tcpServer.GetStream());
-			_srReceiver = new StreamReader(_tcpServer.GetStream());
+			_swSender = new BinaryWriter(_tcpServer.GetStream());
+			_srReceiver = new BinaryReader(_tcpServer.GetStream());
 			
-			// laenge vom public key empfangen
-			Int32 msgLength = Convert.ToInt32(_srReceiver.ReadLine());
-			// server public key empfangen
-			char[] response = new char[msgLength];
-			_srReceiver.Read(response, 0, msgLength);
-			string xmlString = new String(response);
-			// Encryption Klasse mit Public Key vom Server füttern
-			_serverKey = new Encryption(xmlString);
-			
-			// laenge von meinem public key senden
-			char[] publicKey = _self.getPublicKey().ToCharArray();
-			_swSender.WriteLine(publicKey.Length);
+			// sende meinen public key zum server
+			byte[] myPubKey = Converter.fromStringToByteArray(_self.getPublicKey());
+			// sende länge
+			_swSender.Write(myPubKey.Length);
 			_swSender.Flush();
-			// meinen public key senden
-			_swSender.Write(publicKey, 0, publicKey.Length);
+			// sende pubKey
+			_swSender.Write(myPubKey);
 			_swSender.Flush();
 			
-			// mit dem empfangenem server key meinen benutzernamen an server senden
-			string msg = _signature + "_" + User;
-			char[] sendmessage = _serverKey.EncryptOutgoing(msg);
-			_swSender.WriteLine(sendmessage.Length);
+			// empfange rij key + iv vom server (verschlüsselt mit meinem pub key)
+			Int32 length;
+			length = _srReceiver.ReadInt32();
+			response = new byte[length];
+			response = _srReceiver.ReadBytes(length);
+			byte[] rijKey = _self.DecryptRSA(response);
+			length = _srReceiver.ReadInt32();
+			response = new byte[length];
+			response = _srReceiver.ReadBytes(length);
+			byte[] rijIV = _self.DecryptRSA(response);
+			
+			// setup rij für spätere kommunikation
+			_self.setUpRijndael(rijKey, rijIV);
+			
+			// sende meinen usernamen mit rij verschlüsselt
+			answer = _self.EncryptRijndael(Converter.fromStringToByteArray(_signature + "_" + User));
+			_swSender.Write(answer.Length);
 			_swSender.Flush();
-			_swSender.Write(sendmessage, 0, sendmessage.Length);
+			_swSender.Write(answer);
 			_swSender.Flush();
+			
 			_thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
 			_thrMessaging.IsBackground = true;
 			_thrMessaging.Start();
@@ -118,10 +126,10 @@ namespace Client
 		
 		private void ReceiveMessages()
 		{
-			Int32 messageLength = Convert.ToInt32(_srReceiver.ReadLine());
-			char[] response = new char[messageLength];
-			_srReceiver.Read(response, 0, messageLength);
-			String ConResponse = _self.DecryptIncoming(new string(response));
+			Int32 messageLength = Convert.ToInt32(_srReceiver.ReadInt32());
+			byte[] response = new byte[messageLength];
+			response = _srReceiver.ReadBytes(messageLength);
+			String ConResponse = Converter.fromByteArrayToString(_self.DecryptRijndael(response));
 			
 			if (ConResponse[0] == '1')
 			{
@@ -140,10 +148,10 @@ namespace Client
 			
 			while (connected)
 			{
-				messageLength = Convert.ToInt16(_srReceiver.ReadLine());
-				response = new char[messageLength];
-				_srReceiver.Read(response, 0, messageLength);
-				e = new StatusChangedEventArgs(_self.DecryptIncoming(new string(response)));
+				messageLength = Convert.ToInt32(_srReceiver.ReadInt32());
+				response = new byte[messageLength];
+				response = _srReceiver.ReadBytes(messageLength);
+				e = new StatusChangedEventArgs(Converter.fromByteArrayToString(_self.DecryptRijndael(response)));
 				OnStatusChanged(e);
 			}
 		}
@@ -172,10 +180,10 @@ namespace Client
 		
 		public void sendMessage(string message)
 		{
-			char[] msg = _serverKey.EncryptOutgoing(message);
-			_swSender.WriteLine(msg.Length);
+			byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+			_swSender.Write(msg.Length);
 			_swSender.Flush();
-			_swSender.Write(msg, 0, msg.Length);
+			_swSender.Write(msg);
 			_swSender.Flush();
 		}
 		
@@ -191,8 +199,8 @@ namespace Client
 		
 		public bool checkIfServerIsReachable()
 		{
-			Ping pingSender = new Ping ();
-            PingOptions options = new PingOptions ();
+			Ping pingSender = new Ping();
+            PingOptions options = new PingOptions();
             options.DontFragment = true;
             string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             byte[] buffer = System.Text.Encoding.ASCII.GetBytes (data);
