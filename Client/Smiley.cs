@@ -15,6 +15,7 @@ using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.Windows.Media.Effects;
+using WpfAnimatedGif;
 
 namespace Client
 {
@@ -69,12 +70,16 @@ namespace Client
 					p.Inlines.Add(text.Substring(lastPos, match.Index - lastPos));
 	                // Bild hinzufugen falls vorhanden
             		try {
-	                	BitmapImage bitmapSmiley = new BitmapImage(new Uri("pack://application:,,,/Smileys/" + (string)_fixSmileys[match.Value]) );
+	                	BitmapImage bitmapSmiley = new BitmapImage();
+	                	bitmapSmiley.BeginInit();
+	                	bitmapSmiley.UriSource = new Uri("pack://application:,,,/Smileys/" + (string)_fixSmileys[match.Value]);
+	                	bitmapSmiley.EndInit();
                 		System.Windows.Controls.Image smiley = new System.Windows.Controls.Image();
                 		smiley.Source = bitmapSmiley;
                         smiley.Width = bitmapSmiley.Width;
                         smiley.Height = bitmapSmiley.Height;
                         smiley.SnapsToDevicePixels = true;
+                        ImageBehavior.SetAnimatedSource(smiley, bitmapSmiley);
                 		p.Inlines.Add(smiley);
             		}
             		catch (FileNotFoundException)

@@ -166,7 +166,8 @@
 					Grid.Column="0"
 					Margin="3"
 					Height="300"
-					IsReadOnly="False" />
+					IsReadOnly="True"
+					IsDocumentEnabled="True"	/>
 			</Grid>
 			<Grid
 				Grid.Column="0"

@@ -39,8 +39,6 @@ namespace Client
 		
 		private Thread _thrMessaging;
 		
-		private Encryption _serverKey;
-		
 		private Encryption _self;
 				
 		public static event StatusChangedEventHandler StatusChanged;

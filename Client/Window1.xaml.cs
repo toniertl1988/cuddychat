@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.Windows.Media.Imaging;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
+using Microsoft.Win32;
 
 namespace Client
 {
@@ -32,13 +33,14 @@ namespace Client
 	/// </summary>
 	public partial class Window1 : Window
 	{
-
 		// Needed to update the form with messages from another thread
 		private delegate void UpdateLogCallback(string strMessage);
 		// Needed to set the form to a "disconnected" state from another thread
 		private delegate void CloseConnectionCallback(string strReason);
 		
 		private Smiley _smileys = new Smiley();
+		
+		private Parser _parser = new Parser();
 		
 		private ChatClient _client;
 		
@@ -95,7 +97,7 @@ namespace Client
 				p.LineHeight = 1;
 				DateTime today = DateTime.Now;
 				p.Inlines.Add("(" + today.ToString("HH:mm:ss") + ") ");
-				p = _smileys.insertSmileys(p, strMessage);
+				p = _parser.parse(p, strMessage);
 				txtLog.Document.Blocks.Add(p);
 				txtLog.ScrollToEnd();
 			}
@@ -135,11 +137,6 @@ namespace Client
         	}
         	Application.Current.Shutdown();
         }
-        
-    	private static void OnUrlClick(object sender, RoutedEventArgs e)
-		{
-			System.Diagnostics.Process.Start((sender as Hyperlink).NavigateUri.AbsoluteUri);
-		}
     	
     	public void closeApplication(object sender, EventArgs e)
     	{
