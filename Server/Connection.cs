@@ -14,6 +14,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Collections;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Server
 {
@@ -128,6 +129,17 @@ namespace Server
 					swSender.Flush();
 					swSender.Write(msg, 0, msg.Length);
 					swSender.Flush();
+					// send actual user list
+					MemoryStream stream = new MemoryStream();
+					BinaryFormatter bf = new BinaryFormatter();
+					bf.Serialize(stream, ChatServer.users);
+					msg = stream.ToArray();
+					Int32 msgLength = msg.Length;
+					swSender.Write(msgLength);
+					swSender.Flush();
+					swSender.Write(msg);
+					swSender.Flush();
+					// add new user
 					ChatServer.AddUser(tcpClient, currUser, _self);
 				}
 			}

@@ -90,6 +90,7 @@
     <Page Include="Window1.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Images" />
     <Folder Include="Smileys" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +103,7 @@
     <Resource Include="Smileys\asia.gif" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\info.png" />
     <None Include="WpfAnimatedGif.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />

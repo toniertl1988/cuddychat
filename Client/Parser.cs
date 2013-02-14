@@ -32,8 +32,12 @@ namespace Client
 			_defaultBrowser = _findDefaultBrowser();
 		}
 		
-		public Paragraph parse(Paragraph p, string message)
+		public Paragraph parse(string message)
 		{
+			Paragraph p = new Paragraph();
+			p.LineHeight = 1;
+			DateTime today = DateTime.Now;
+			p.Inlines.Add("(" + today.ToString("HH:mm:ss") + ") ");
 			int lastPos = 0;
 			foreach (Match match in _regexUrl.Matches(message.Replace(Environment.NewLine,"")))
 			{

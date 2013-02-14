@@ -7,14 +7,19 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Security.Cryptography;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Client
 {
@@ -23,6 +28,8 @@ namespace Client
 	/// </summary>
 	public class ChatClient
 	{
+		
+		private List<string> _users = new List<string>();
 		
 		private BinaryWriter _swSender;
 		private BinaryReader _srReceiver;
@@ -133,6 +140,19 @@ namespace Client
 			{
 				e = new StatusChangedEventArgs("Connected Successfully!");
 				OnStatusChanged(e);
+				
+				// read actual user list from server
+				
+				BinaryFormatter bf = new BinaryFormatter();
+				messageLength = Convert.ToInt32(_srReceiver.ReadInt32());
+				response = new byte[messageLength];
+				response = _srReceiver.ReadBytes(messageLength);
+				MemoryStream ms = new MemoryStream(response);
+				List<string> user = (List<string>) bf.Deserialize(ms);
+				foreach (var element in user) {
+					_users.Add(element);
+				}
+				
 			}
 			else if (ConResponse[0] == '0')
 			{
@@ -160,6 +180,7 @@ namespace Client
 			sendMessage("ClosingChatServerConnectionRequest");
 			e = new StatusChangedEventArgs(Reason);
 			OnStatusChanged(e);
+			_users.Clear();
 			if (_thrMessaging != null) {
 				//_thrMessaging.Abort();
 			}
@@ -209,6 +230,30 @@ namespace Client
             	return true;
             }
             return false;
+		}
+		
+		public bool checkIfAdminMessage(string message)
+		{
+			if (message.IndexOfAny("Administrator".ToCharArray()) != -1) {
+				return true;
+			}
+			return false;
+		}
+		
+		public void manageAdminMessage(string message)
+		{
+			if (message.IndexOf("join") != -1) {
+				_users.Add(message.Replace("Administrator: ", "").Replace(" has joined us", ""));
+			}
+			if (message.IndexOf("left") != -1) {
+				_users.Remove(message.Replace("Administrator: ", "").Replace(" has left us", ""));
+			}
+			_users.Sort();
+		}
+		
+		public List<string> getUsers()
+		{
+			return _users;
 		}
 	}
 }

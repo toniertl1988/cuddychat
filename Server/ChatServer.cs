@@ -24,6 +24,7 @@ namespace Server
 	public class ChatServer : IDisposable
 	{
 		private bool disposed = false;
+		public static List<string> users = new List<string>();
 		public static Hashtable htUsers = new Hashtable(30);
 		public static Hashtable htConnections = new Hashtable(30);
 		public static Hashtable htEncryptions = new Hashtable(30);
@@ -55,9 +56,10 @@ namespace Server
 				throw new Exception("ungültige IP");
 			}
 		}
-				
+
 		public static void AddUser(TcpClient tcpUser, string strUsername, Encryption encryption)
 		{
+			ChatServer.users.Add(strUsername);
 			ChatServer.htUsers.Add(strUsername, tcpUser);
 			ChatServer.htConnections.Add(tcpUser, strUsername);
 			ChatServer.htEncryptions.Add(tcpUser, encryption);
@@ -69,6 +71,7 @@ namespace Server
 			if (htConnections[tcpUser] != null)
 			{
 				SendAdminMessage(htConnections[tcpUser] + " has left us");
+				ChatServer.users.Remove(ChatServer.htConnections[tcpUser].ToString());
 				ChatServer.htUsers.Remove(ChatServer.htConnections[tcpUser]);
 				ChatServer.htEncryptions.Remove(htConnections[tcpUser]);
 				ChatServer.htConnections.Remove(tcpUser);

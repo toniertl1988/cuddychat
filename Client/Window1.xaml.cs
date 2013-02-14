@@ -7,7 +7,9 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -93,13 +95,12 @@ namespace Client
 			}
 			if (strMessage.Length != 0)
 			{
-				Paragraph p = new Paragraph();
-				p.LineHeight = 1;
-				DateTime today = DateTime.Now;
-				p.Inlines.Add("(" + today.ToString("HH:mm:ss") + ") ");
-				p = _parser.parse(p, strMessage);
-				txtLog.Document.Blocks.Add(p);
+				txtLog.Document.Blocks.Add( _parser.parse(strMessage));
 				txtLog.ScrollToEnd();
+				if (_client.checkIfAdminMessage(strMessage) == true) {
+					_client.manageAdminMessage(strMessage);
+					listUser.ItemsSource = new ObservableCollection<string>(_client.getUsers());
+				}
 			}
 		}
 		
@@ -156,6 +157,11 @@ namespace Client
 		{
     		// Call the method that updates the form
     		this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateGui), new object[] { e.EventMessage });
+		}
+		
+		public void openUserInfo(object sender, EventArgs e)
+		{
+			MessageBox.Show(listUser.SelectedItem.ToString());
 		}
 	}
 }

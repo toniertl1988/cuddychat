@@ -155,6 +155,8 @@
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition
 						Width="Auto" />
+					<ColumnDefinition
+						Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<RichTextBox
 					Name="txtLog"
@@ -167,7 +169,27 @@
 					Margin="3"
 					Height="300"
 					IsReadOnly="True"
-					IsDocumentEnabled="True"	/>
+					IsDocumentEnabled="True" />
+				<ListBox
+					Name="listUser"
+					Width="100"
+					VerticalAlignment="Top"
+					HorizontalAlignment="Right"
+					Grid.Row="0"
+					Grid.Column="1"
+					Margin="3"
+					Height="300"
+					SelectionMode="Single" >
+					<ListBox.ContextMenu>
+						<ContextMenu>
+				            <MenuItem Header="Info" Click="openUserInfo">
+				                <MenuItem.Icon>
+				                    <Image Source="pack://application:,,,/Images/info.png" />
+				                </MenuItem.Icon>
+				            </MenuItem>
+        				</ContextMenu>						
+					</ListBox.ContextMenu>
+				</ListBox>
 			</Grid>
 			<Grid
 				Grid.Column="0"
