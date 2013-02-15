@@ -71,11 +71,21 @@ namespace Server
 		
 		private void UpdateStatus(string strMessage)
 		{
-			// Updates the log with the message
 			DateTime today = DateTime.Now;
-			
-			txtLog.AppendText("(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r");
+			string text = "(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r";
+			if (strMessage.IndexOf("Admin") == -1)
+			{
+				if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true")
+				{
+					txtLog.AppendText(text);
+				}
+		    }
+			else
+			{
+				txtLog.AppendText(text);
+			}
 			txtLog.ScrollToEnd();
+			
 		}
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -91,6 +101,20 @@ namespace Server
         		mainServer.StopListening();
         	}
     		Application.Current.Shutdown();
+    	}
+    	
+    	public void logManagement(object sender, EventArgs e)
+    	{
+    		if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true")
+    		{
+    			System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] = "false";
+				MessageBox.Show("Logging der User Nachrichten ausgeschaltet");
+    		}
+    		else
+    		{
+    			System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] = "true";
+				MessageBox.Show("Logging der User Nachrichten eingeschaltet");
+    		}
     	}
 	}
 }

@@ -30,8 +30,20 @@
 				</MenuItem>
 			</MenuItem>
 			<MenuItem
+				Header="_Settings"
+				Name="settingsMenuItem">
+				<MenuItem Header="_LogUserMessages" IsCheckable="True"
+					Click="logManagement">
+					<MenuItem.ToolTip>
+						<ToolTip>
+							Log Verwaltung
+						</ToolTip>
+					</MenuItem.ToolTip>
+				</MenuItem>
+			</MenuItem>
+			<MenuItem
 				Header="_Help"
-				Name="menuItem1">
+				Name="helpMenuItem">
 				<MenuItem
 					Header="_About">
 					<MenuItem.ToolTip>
@@ -42,9 +54,11 @@
 				</MenuItem>
 			</MenuItem>
 		</Menu>
-		<StatusBar DockPanel.Dock="Bottom">
-            <TextBlock Text="Statuszeile - alles läuft wunderbar" />
-        </StatusBar>
+		<StatusBar
+			DockPanel.Dock="Bottom">
+			<TextBlock
+				Text="Statuszeile - alles läuft wunderbar" />
+		</StatusBar>
 		<Grid>
 			<Grid.RowDefinitions>
 				<RowDefinition
@@ -56,7 +70,9 @@
 				<ColumnDefinition
 					Width="Auto" />
 			</Grid.ColumnDefinitions>
-			<Grid Grid.Row="0" Grid.Column="0">
+			<Grid
+				Grid.Row="0"
+				Grid.Column="0">
 				<Grid.RowDefinitions>
 					<RowDefinition
 						Height="Auto" />
@@ -69,39 +85,41 @@
 					<ColumnDefinition
 						Width="Auto" />
 				</Grid.ColumnDefinitions>
-			<Label
-				Content="IP-Adresse:"
-				Grid.Column="0"
-				Grid.Row="0"
-				HorizontalAlignment="Left"
-				VerticalAlignment="Top"
-				Width="76"
-				Height="29"
-				Margin="3"
-			/>
-			<TextBox
-				Name="txtIp"
-				Grid.Column="1"
-				Grid.Row="0"
-				HorizontalAlignment="Left"
-				VerticalAlignment="Top"
-				Width="133"
-				Height="24"
-				Margin="3"
-				Text="192.168.184.230" />
-			<Button
-				Name="btnListen"
-				Grid.Column="2"
-				Grid.Row="0"
-				HorizontalAlignment="Right"
-				VerticalAlignment="Top"
-				Margin="3"
-				Width="151"
-				Height="24"
-				Content="Start Listening"
-				Click="btnListen_Click" />
+				<Label
+					Content="IP-Adresse:"
+					Grid.Column="0"
+					Grid.Row="0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Width="76"
+					Height="29"
+					Margin="3" />
+				<TextBox
+					Name="txtIp"
+					Grid.Column="1"
+					Grid.Row="0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Width="133"
+					Height="24"
+					Margin="3"
+					Text="192.168.184.230" />
+				<Button
+					Name="btnListen"
+					Grid.Column="2"
+					Grid.Row="0"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Top"
+					Margin="3"
+					Width="151"
+					Height="24"
+					Content="Start Listening"
+					Click="btnListen_Click" />
 			</Grid>
-			<Grid Grid.Column="0" Grid.Row="1" Margin="5">
+			<Grid
+				Grid.Column="0"
+				Grid.Row="1"
+				Margin="5">
 				<RichTextBox
 					Name="txtLog"
 					Grid.Column="0"
@@ -112,8 +130,7 @@
 					Width="415"
 					Height="400"
 					AcceptsReturn="True"
-					VerticalScrollBarVisibility="Visible"
-				/>
+					VerticalScrollBarVisibility="Visible" />
 			</Grid>
 		</Grid>
 	</DockPanel>

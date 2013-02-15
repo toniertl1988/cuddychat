@@ -64,6 +64,7 @@ namespace Client
 					btnConnect.Content = "Disconnect";
 					txtIp.IsEnabled = false;
 					txtUser.IsEnabled = false;
+					txtMessage.Focus();
 				}
 				else
 				{
@@ -162,6 +163,14 @@ namespace Client
 		public void openUserInfo(object sender, EventArgs e)
 		{
 			MessageBox.Show(listUser.SelectedItem.ToString());
+		}
+		
+		public void TxtUser_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				btnConnect_Click(sender, e);
+			}
 		}
 	}
 }
