@@ -28,4 +28,6 @@ Roadmap
 - Version 1.1.13 - add smiley window
 - Version 1.1.14 - dynamic smiley add and parsing
 
-- Version 1.2 - login window + registration with server
+- Version 1.2 - private chats
+- Version 1.3 - file transfer with private chats
+- Version 1.4 - login window + registration with server
