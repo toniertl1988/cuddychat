@@ -36,7 +36,7 @@ namespace Client
 	public partial class Window1 : Window
 	{
 		// Needed to update the form with messages from another thread
-		private delegate void UpdateLogCallback(string strMessage);
+		private delegate void UpdateLogCallback(string strMessage, string transmitter, string receiver);
 		// Needed to set the form to a "disconnected" state from another thread
 		private delegate void CloseConnectionCallback(string strReason);
 		
@@ -46,8 +46,10 @@ namespace Client
 		
 		private ChatClient _client;
 		
+		protected Hashtable _privateChats = new Hashtable();
+		
 		public Window1()
-		{
+		{		
 			InitializeComponent();
 			txtLog.Document.Blocks.Clear();
 			_client = new ChatClient();
@@ -80,7 +82,7 @@ namespace Client
 			}
 		}
 		
-		private void UpdateGui(string strMessage)
+		private void UpdateGui(string strMessage, string transmitter, string receiver)
 		{
 			if (_client.connected == true)
 			{
@@ -96,11 +98,37 @@ namespace Client
 			}
 			if (strMessage.Length != 0)
 			{
-				txtLog.Document.Blocks.Add( _parser.parse(strMessage));
-				txtLog.ScrollToEnd();
-				if (_client.checkIfAdminMessage(strMessage) == true) {
-					_client.manageAdminMessage(strMessage);
-					listUser.ItemsSource = new ObservableCollection<string>(_client.getUsers());
+				if (transmitter == "Administrator")
+				{
+					transmitter = transmitter + ": ";
+					txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
+					txtLog.ScrollToEnd();
+					if (_client.checkIfAdminMessage(transmitter + strMessage) == true)
+					{
+						_client.manageAdminMessage(transmitter + strMessage);
+						listUser.ItemsSource = new ObservableCollection<string>(_client.getUsers());
+					}
+				} else {
+					if (receiver == "global")
+					{
+						transmitter = transmitter + ": ";
+						txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
+						txtLog.ScrollToEnd();
+					}
+					else
+					{
+						if (_privateChats.ContainsKey(transmitter) == false)
+					    {
+							PrivateWindow newWindow = new PrivateWindow(transmitter);
+							newWindow.setOwner(this);
+							newWindow.Show();
+							_privateChats.Add(transmitter, newWindow);
+					    }
+						PrivateWindow partnerWindow = (PrivateWindow) _privateChats[transmitter];
+						transmitter = transmitter + ": ";
+						partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
+						partnerWindow.txtLog.ScrollToEnd();
+					}
 				}
 			}
 		}
@@ -109,7 +137,7 @@ namespace Client
 		{
 			if (txtMessage.Text.Length != 0)
 			{
-				SendMessage();
+				SendMessage(txtMessage.Text, "global");
 			}
 		}
 		
@@ -121,21 +149,44 @@ namespace Client
 			}
 			else if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
 			{
-				SendMessage();
+				SendMessage(txtMessage.Text, "global");
 			}
 		}
 		
-		private void SendMessage()
+		public void SendMessage()
 		{
 			_client.sendMessage(txtMessage.Text);
 			txtMessage.Text = "";
 			txtMessage.Focus();
 		}
 		
+		public void SendMessage(string message, string receiver)
+		{
+			_client.sendMessage(message, receiver);
+			if (receiver == "global")
+			{
+				txtMessage.Text = "";
+				txtMessage.Focus();
+			}
+			else
+			{
+				PrivateWindow partnerWindow = (PrivateWindow) _privateChats[receiver];
+				string transmitter = txtUser.Text + ": ";
+				partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(transmitter + message));
+				partnerWindow.txtLog.ScrollToEnd();
+				partnerWindow.txtMessage.Text = "";
+				partnerWindow.txtMessage.Focus();
+			}
+		}
+		
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
         	if (_client.getTcpServer() != null) {
         		_client.closeConnection("Disconnect");
+        	}
+        	foreach (DictionaryEntry element in _privateChats) {
+        		PrivateWindow actualWindow = (PrivateWindow) element.Value;
+        		actualWindow.Close();
         	}
         	Application.Current.Shutdown();
         }
@@ -157,7 +208,7 @@ namespace Client
 		public void mainServer_StatusChanged(object sender, StatusChangedEventArgs e)
 		{
     		// Call the method that updates the form
-    		this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateGui), new object[] { e.EventMessage });
+    		this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateGui), new object[] { e.EventMessage.Message, e.EventMessage.Transmitter, e.EventMessage.Receiver });
 		}
 		
 		public void openUserInfo(object sender, EventArgs e)
@@ -171,6 +222,35 @@ namespace Client
 			{
 				btnConnect_Click(sender, e);
 			}
+		}
+		
+		public void openPrivateChat(object sender, EventArgs e)
+		{
+			openPrivateChat(listUser.SelectedItem.ToString());
+		}
+		
+		public void ListUser_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			openPrivateChat(listUser.SelectedItem.ToString());
+		}
+		
+		public void closePrivateChat(string partner)
+		{
+			if (_privateChats.ContainsKey(partner))
+		    {
+				_privateChats.Remove(partner);
+		    }
+		}
+		
+		protected void openPrivateChat(string partner)
+		{
+			PrivateWindow window = new PrivateWindow(partner);
+			window.setOwner(this);
+			if (_privateChats.ContainsKey(partner)) {
+				_privateChats.Remove(partner);
+			}
+			_privateChats.Add(partner, window);
+			window.Show();
 		}
 	}
 }

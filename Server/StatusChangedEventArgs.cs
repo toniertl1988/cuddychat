@@ -7,6 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using Library;
 
 namespace Server
 {
@@ -17,17 +18,17 @@ namespace Server
 	
 	public class StatusChangedEventArgs : EventArgs
 	{
-		private string EventMsg;
+		private Chatmessage EventMsg;
 		
-		public string EventMessage
+		public Chatmessage EventMessage
 		{
         get { return EventMsg; }
         set { EventMsg = value; }
 		}
 		
-		public StatusChangedEventArgs(string strEventMsg)
+		public StatusChangedEventArgs(Chatmessage message)
 		{
-			EventMsg = strEventMsg;
+			EventMsg = message;
 		}
 	}
 }

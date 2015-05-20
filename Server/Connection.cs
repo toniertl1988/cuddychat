@@ -15,6 +15,7 @@ using System.IO;
 using System.Threading;
 using System.Collections;
 using System.Runtime.Serialization.Formatters.Binary;
+using Library;
 
 namespace Server
 {
@@ -77,21 +78,27 @@ namespace Server
 			swSender.Write(answer);
 			swSender.Flush();
 			
-			// empfange mit rij verschlüsselten usernamen vom client
+			// empfange chatmessage objekt mit usernamen signature und message
 			length = srReceiver.ReadInt32();
 			response = new byte[length];
 			response = srReceiver.ReadBytes(length);
 			
-			currUser = Converter.fromByteArrayToString(_self.DecryptRijndael(response));
-			int pos = currUser.IndexOf(_acceptedSignature, 0);
-			currUser = currUser.Replace(_acceptedSignature + "_", "");
+			Chatmessage message = (Chatmessage) Converter.fromByteArrayToObject(_self.DecryptRijndael(response));
+			int pos = 0;
+			if (message.Signature != _acceptedSignature)
+			{
+				pos = -1;
+			}
+			currUser = message.Transmitter;
 			if (currUser != "")
 			{
-				string message = "";
+				Chatmessage serverResponse = new Chatmessage();
+				serverResponse.Transmitter = "Administrator";
+				serverResponse.Receiver = currUser;
 				if (pos == -1)
 				{
-					message = "0|Wrong Client.";
-					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					serverResponse.Message = "0|Wrong Client.";
+					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg);
@@ -101,8 +108,8 @@ namespace Server
 				}
 				else if (ChatServer.htUsers.Contains(currUser) == true)
 				{
-					message = "0|This username already exists.";
-					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					serverResponse.Message = "0|This username already exists.";
+					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg);
@@ -112,8 +119,8 @@ namespace Server
 				}
 				else if (currUser == "Administrator")
 				{
-					message = "0|This username is reserved.";
-					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					serverResponse.Message = "0|This username is reserved.";
+					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg);
@@ -123,13 +130,14 @@ namespace Server
 				}
 				else
 				{
-					message = "1";
-					byte[] msg = _self.EncryptRijndael(Converter.fromStringToByteArray(message));
+					serverResponse.Message = "1|Connected Successfully";
+					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg, 0, msg.Length);
 					swSender.Flush();
 					// send actual user list
+					
 					MemoryStream stream = new MemoryStream();
 					BinaryFormatter bf = new BinaryFormatter();
 					bf.Serialize(stream, ChatServer.users);
@@ -139,6 +147,7 @@ namespace Server
 					swSender.Flush();
 					swSender.Write(msg);
 					swSender.Flush();
+					
 					// add new user
 					ChatServer.AddUser(tcpClient, currUser, _self);
 				}
@@ -155,20 +164,21 @@ namespace Server
 				{
       				 response = new byte[length];
 					 response = srReceiver.ReadBytes(length);
-					 strResponse = Converter.fromByteArrayToString(_self.DecryptRijndael(response));
+					 var rawResponse = Converter.fromByteArrayToObject(_self.DecryptRijndael(response));
+					 Chatmessage chatResponse = (Chatmessage) rawResponse;
 					 
-					 if (strResponse == null)
+					 if (chatResponse.Message == null)
 					 {
 					     ChatServer.RemoveUser(tcpClient);
 					 }
 					 
-					 else if (strResponse == "ClosingChatServerConnectionRequest")
+					 else if (chatResponse.Message == "ClosingChatServerConnectionRequest")
 					 {
 					 	ChatServer.RemoveUser(tcpClient);
 					 }
 					 else 
 					 {
-					 	ChatServer.SendMessage(currUser, strResponse);
+					 	ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver);
 					 }
 				}
 			}

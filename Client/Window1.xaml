@@ -121,7 +121,7 @@
 					Width="150"
 					Height="25"
 					Margin="3"
-					Text="192.168.184.230" />
+					Text="192.168.182.71" />
 				<TextBox
 					Name="txtUser"
 					Grid.Column="1"
@@ -180,9 +180,18 @@
 					Grid.Column="1"
 					Margin="3"
 					Height="300"
-					SelectionMode="Single">
+					SelectionMode="Single"
+					MouseDoubleClick="ListUser_MouseDoubleClick">
 					<ListBox.ContextMenu>
 						<ContextMenu>
+							<MenuItem
+								Header="Privater Chat"
+								Click="openPrivateChat">
+								<MenuItem.Icon>
+									<Image
+										Source="pack://application:,,,/Images/info.png" />
+								</MenuItem.Icon>
+							</MenuItem>
 							<MenuItem
 								Header="Info"
 								Click="openUserInfo">

@@ -1,0 +1,24 @@
+1. client stellt unverschlüsselt anfrage an server - ok
+2. server bestätigt unverschlüsselt bereitschaft - ok
+3. client erstellt public/private key - ok
+4. client sendet public key zum server - ok
+5. server erstellt rij+iv key - ok
+6. server verschlüsselt rij+iv mit public key - ok
+7. server sendet verschlüsselte daten - ok
+8. client benutzt private key zum entschlüsseln und speichert sich rij+iv weg - ok
+
+so ab da haste quasi deine sitzung und kannste nachrichten per rij/iv verschlüsseln und senden/empfangen
+
+pub + priv - das is auch nur für den beginn der sitzung ... 
+wenn du beim client einmal rij+iv hast, kannste die nachrichten dann im folgenden mit rij+iv verschlüsseln ... 
+du brauchst halt ne art protokoll, dass du dem server sagst hey hier kommt jetzt gleich ne verschlüsselte nachricht, 
+ich hab aber schon ne sitzung mit dir, benutz doch bitte rij+iv zum entschlüsseln
+
+aber kleiner tipp: wenn du public/private key erzeugst, mach das auf nem background thread ^^ 1024 bit gehen noch, aber 2048 bit dauern doch schon bis zu 5sek ^^
+
+klasse serialsieren und über stream senden:  komplette objekt verschlüsseln
+
+
+Regex url_regex = new Regex(@"(http:\/\/([\w.]+\/?)\S*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+Regex email_regex = new Regex(@"([a-zA-Z_0-9.-]+\@[a-zA-Z_0-9.-]+\.\w+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);

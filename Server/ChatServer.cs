@@ -15,6 +15,7 @@ using System.IO;
 using System.Threading;
 using System.Collections;
 using System.Security.Cryptography;
+using Library;
 
 namespace Server
 {
@@ -90,11 +91,14 @@ namespace Server
 		public static void SendAdminMessage(string Message)
 		{
 			BinaryWriter swSender;
-			e = new StatusChangedEventArgs("Administrator: " + Message);
+			Chatmessage adminMessage = new Chatmessage();
+			adminMessage.Transmitter = "Administrator";
+			adminMessage.Receiver = "global";
+			adminMessage.Message = Message;
+			e = new StatusChangedEventArgs(adminMessage);
 			OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
 			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
-			string message = "";
 			for (int i = 0; i < tcpClients.Length; i++)
 			{
 				try
@@ -105,8 +109,7 @@ namespace Server
 					}
 					Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
 					swSender = new BinaryWriter(tcpClients[i].GetStream());
-					message = "Administrator: " + Message;
-					byte[] sendMessage = tmp.EncryptRijndael(Converter.fromStringToByteArray(message));
+					byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(adminMessage));
 					swSender.Write(sendMessage.Length);
 					swSender.Flush();
 					swSender.Write(sendMessage);
@@ -120,39 +123,58 @@ namespace Server
 			}
 		}
 		
-		public static void SendMessage(string From, string Message)
+		public static void SendMessage(string From, string Message, string Receiver)
 		{
 			BinaryWriter swSender;
-			e = new StatusChangedEventArgs(From + " says: " + Message);
+			Chatmessage userMessage = new Chatmessage();
+			userMessage.Transmitter = From;
+			userMessage.Message = Message;
+			userMessage.Receiver = Receiver;
+			e = new StatusChangedEventArgs(userMessage);
 			OnStatusChanged(e);
 			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
 			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
-			string message = "";
-			for (int i = 0; i < tcpClients.Length; i++)
+			if (Receiver == "global")
 			{
-				try
+				for (int i = 0; i < tcpClients.Length; i++)
 				{
-					if (Message.Trim() == "" || tcpClients[i] == null)
+					try
 					{
-						continue;
+						if (Message.Trim() == "" || tcpClients[i] == null)
+						{
+							continue;
+						}
+						else
+						{
+							Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
+							swSender = new BinaryWriter(tcpClients[i].GetStream());
+							userMessage.Message = Message;
+							byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
+							swSender.Write(sendMessage.Length);
+							swSender.Flush();
+							swSender.Write(sendMessage);
+							swSender.Flush();
+							swSender = null;
+						}
 					}
-					else
+					catch
 					{
-						Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
-						swSender = new BinaryWriter(tcpClients[i].GetStream());
-						message = From + " says: " + Message;
-						byte[] sendMessage = tmp.EncryptRijndael(Converter.fromStringToByteArray(message));
-						swSender.Write(sendMessage.Length);
-						swSender.Flush();
-						swSender.Write(sendMessage);
-						swSender.Flush();
-						swSender = null;
+						RemoveUser(tcpClients[i]);
 					}
 				}
-				catch
-				{
-					RemoveUser(tcpClients[i]);
-				}
+			}
+			else
+			{
+				Encryption tmp = (Encryption)ChatServer.htEncryptions[ChatServer.htUsers[Receiver]];
+				TcpClient connection = (TcpClient) ChatServer.htUsers[Receiver];
+				swSender = new BinaryWriter(connection.GetStream());
+				userMessage.Message = Message;
+				byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
+				swSender.Write(sendMessage.Length);
+				swSender.Flush();
+				swSender.Write(sendMessage);
+				swSender.Flush();
+				swSender = null;
 			}
 		}
 		
@@ -204,13 +226,13 @@ namespace Server
         public void StopListening()
         {
         	ServRunning = false;
-        	if (thrListener != null)
-        	{
-        		thrListener.Abort();
-        	}
         	if (tlsClient != null)
         	{
         		tlsClient.Stop();
+        	}
+        	if (thrListener != null)
+        	{
+        		thrListener.Abort();
         	}
         }
         

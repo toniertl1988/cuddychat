@@ -66,7 +66,7 @@ namespace Server
 		public void mainServer_StatusChanged(object sender, StatusChangedEventArgs e)
 		{
     		// Call the method that updates the form
-    		this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage });
+    		this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage.Message });
 		}
 		
 		private void UpdateStatus(string strMessage)
@@ -93,6 +93,7 @@ namespace Server
         	if (mainServer.getServerStatus() == true) {
         		mainServer.StopListening();
         	}
+        	Application.Current.Shutdown();
         }
         
     	public void closeApplication(object sender, EventArgs e)

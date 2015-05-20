@@ -69,9 +69,12 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="ChatClient.cs" />
-    <Compile Include="Converter.cs" />
     <Compile Include="Encyption.cs" />
     <Compile Include="Parser.cs" />
+    <Compile Include="PrivateWindow.xaml.cs">
+      <DependentUpon>PrivateWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\WPFAssemblyInfo.cs" />
     <Compile Include="SmileyWindow.xaml.cs">
@@ -86,6 +89,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="PrivateWindow.xaml" />
     <Page Include="SmileyWindow.xaml" />
     <Page Include="Window1.xaml" />
   </ItemGroup>
@@ -104,7 +108,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\info.png" />
+    <None Include="app.config" />
     <None Include="WpfAnimatedGif.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{28E3809A-2895-4454-B73E-388AF918B4C9}</Project>
+      <Name>Library</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>
