@@ -21,12 +21,11 @@ History
 
 Roadmap
 ======
-- version 1.1.9 - client xaml modifying for better look ;-)
-- version 1.1.10 - send user info to server for info of user on right click in user list in client
-- version 1.1.11 - single instance of server
-- version 1.1.12 - single instance of client
-- Version 1.1.13 - add smiley window
-- Version 1.1.14 - dynamic smiley add and parsing
+- version 1.1.09 - send user info to server for info of user on right click in user list in client
+- version 1.1.10 - single instance of server
+- version 1.1.11 - single instance of client
+- Version 1.1.12 - add smiley window
+- Version 1.1.13 - dynamic smiley add and parsing
 
 - Version 1.2 - private chats
 
