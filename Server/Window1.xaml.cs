@@ -66,7 +66,12 @@ namespace Server
 		public void mainServer_StatusChanged(object sender, StatusChangedEventArgs e)
 		{
     		// Call the method that updates the form
-    		this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage.Message });
+    		try {
+    			this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage.Message });
+    		} catch (Exception) {
+    			// do nothing
+    		}
+    		
 		}
 		
 		private void UpdateStatus(string strMessage)

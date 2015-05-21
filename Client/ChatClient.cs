@@ -39,8 +39,6 @@ namespace Client
 		
 		private int _port = 8118;
 		
-		private string _signature = "C0dd1Ch2tCli3nt";
-		
 		private IPAddress _ipAddr;
 		
 		private TcpClient _tcpServer;
@@ -115,7 +113,7 @@ namespace Client
 			Library.Chatmessage message = new Library.Chatmessage();
 			message.Transmitter = User;
 			message.Message = "Welcome";
-			message.SystemInformation = Environment.OSVersion;
+			message.OperatingSystem = Environment.OSVersion;
 			
 			answer = _self.EncryptRijndael(Converter.fromObjectToByteArray(message));
 			_swSender.Write(answer.Length);
@@ -193,8 +191,11 @@ namespace Client
 			message.Receiver = "global";
 			message.Message = "ClosingChatServerConnectionRequest";
 			sendMessage("ClosingChatServerConnectionRequest");
-			e = new StatusChangedEventArgs(message);
-			OnStatusChanged(e);
+			
+			// needed here?!
+			//e = new StatusChangedEventArgs(message);
+			//OnStatusChanged(e);
+			
 			_users.Clear();
 			if (_thrMessaging != null) {
 				//_thrMessaging.Abort();

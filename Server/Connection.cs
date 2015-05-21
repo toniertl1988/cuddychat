@@ -29,16 +29,15 @@ namespace Server
 		private BinaryReader srReceiver;
 		private BinaryWriter swSender;
 		private string currUser;
-		private string strResponse;
 		
-		private Encryption _self;
+		private Encryption serverEncryption;
 		
 		private string _acceptedSignature = "C0dd1Ch2tCli3nt";
 		
 		public Connection(TcpClient tcpCon, Encryption server)
 		{
 			tcpClient = tcpCon;
-			_self = server;
+			serverEncryption = server;
 			thrSender = new Thread(AcceptClient);
 			thrSender.Start();
 		}
@@ -67,12 +66,12 @@ namespace Server
 			Encryption clientEncryption = new Encryption(clientPubKey);
 			
 			// sende mit client pub key verschlüsselt rij key + iv
-			answer = clientEncryption.EncryptRSA(_self.getRijKey());
+			answer = clientEncryption.EncryptRSA(serverEncryption.getRijKey());
 			swSender.Write(answer.Length);
 			swSender.Flush();
 			swSender.Write(answer);
 			swSender.Flush();
-			answer = clientEncryption.EncryptRSA(_self.getRijIV());
+			answer = clientEncryption.EncryptRSA(serverEncryption.getRijIV());
 			swSender.Write(answer.Length);
 			swSender.Flush();
 			swSender.Write(answer);
@@ -83,7 +82,7 @@ namespace Server
 			response = new byte[length];
 			response = srReceiver.ReadBytes(length);
 			
-			Chatmessage message = (Chatmessage) Converter.fromByteArrayToObject(_self.DecryptRijndael(response));
+			Chatmessage message = (Chatmessage) Converter.fromByteArrayToObject(serverEncryption.DecryptRijndael(response));
 			int pos = 0;
 			if (message.Signature != _acceptedSignature)
 			{
@@ -98,7 +97,7 @@ namespace Server
 				if (pos == -1)
 				{
 					serverResponse.Message = "0|Wrong Client.";
-					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
+					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg);
@@ -106,10 +105,10 @@ namespace Server
 					CloseConnection();
 					return;
 				}
-				else if (ChatServer.htUsers.Contains(currUser) == true)
+				else if (ChatServer.userInfos.ContainsKey(currUser) == true)
 				{
 					serverResponse.Message = "0|This username already exists.";
-					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
+					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg);
@@ -120,7 +119,7 @@ namespace Server
 				else if (currUser == "Administrator")
 				{
 					serverResponse.Message = "0|This username is reserved.";
-					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
+					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg);
@@ -131,13 +130,13 @@ namespace Server
 				else
 				{
 					serverResponse.Message = "1|Connected Successfully";
-					byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
+					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
 					swSender.Write(msg.Length);
 					swSender.Flush();
 					swSender.Write(msg, 0, msg.Length);
 					swSender.Flush();
-					// send actual user list
 					
+					// send actual user list
 					MemoryStream stream = new MemoryStream();
 					BinaryFormatter bf = new BinaryFormatter();
 					bf.Serialize(stream, ChatServer.users);
@@ -149,7 +148,7 @@ namespace Server
 					swSender.Flush();
 					
 					// add new user
-					ChatServer.AddUser(tcpClient, currUser, _self);
+					ChatServer.AddUser(tcpClient, currUser, serverEncryption);
 				}
 			}
 			else
@@ -164,27 +163,27 @@ namespace Server
 				{
       				 response = new byte[length];
 					 response = srReceiver.ReadBytes(length);
-					 var rawResponse = Converter.fromByteArrayToObject(_self.DecryptRijndael(response));
+					 var rawResponse = Converter.fromByteArrayToObject(serverEncryption.DecryptRijndael(response));
 					 Chatmessage chatResponse = (Chatmessage) rawResponse;
 					 
 					 if (chatResponse.Message == null)
 					 {
-					     ChatServer.RemoveUser(tcpClient);
+					     ChatServer.RemoveUser(currUser);
 					 }
 					 
 					 else if (chatResponse.Message == "ClosingChatServerConnectionRequest")
 					 {
-					 	ChatServer.RemoveUser(tcpClient);
+					 	ChatServer.RemoveUser(currUser);
 					 }
 					 else 
 					 {
-					 	ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver);
+				 		ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver);
 					 }
 				}
 			}
 			catch
 			{
-				ChatServer.RemoveUser(tcpClient);
+				ChatServer.RemoveUser(currUser);
 			}
 		}
 	}

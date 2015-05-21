@@ -26,7 +26,7 @@ namespace Library
 		
 		protected string _signature = "C0dd1Ch2tCli3nt";
 		
-		protected string _systemInformation;
+		protected OperatingSystem _operatingSystem;
 		
 		public string Signature {
 			get { return _signature; }
@@ -47,9 +47,9 @@ namespace Library
 			set { _message = value; }
 		}
 		
-		public string SystemInformation {
-			get { return _systemInformation; }
-			set { _systemInformation = value; }
+		public OperatingSystem OperatingSystem {
+			get { return _operatingSystem; }
+			set { _operatingSystem = value; }
 		}
 		
 	}

@@ -25,27 +25,29 @@ namespace Server
 	public class ChatServer : IDisposable
 	{
 		private bool disposed = false;
+		
 		public static List<string> users = new List<string>();
-		public static Hashtable htUsers = new Hashtable(30);
-		public static Hashtable htConnections = new Hashtable(30);
-		public static Hashtable htEncryptions = new Hashtable(30);
+		public static Dictionary<string, User> userInfos = new Dictionary<string, User>();
+		
 		private IPAddress ipAddress;
 		private TcpClient tcpClient;
+		
 		public static event StatusChangedEventHandler StatusChanged;
 		private static StatusChangedEventArgs e;
 		
 		private Thread thrListener;
 		private TcpListener tlsClient;
+		
 		bool ServRunning = false;
 		
-		private Encryption _self;
+		private Encryption serverEncryption;
 		
 		private string _selfIpAddress = "";
 		
 		public ChatServer()
 		{
-			_self = new Encryption();
-			_self.setUpRijndael();
+			serverEncryption = new Encryption();
+			serverEncryption.setUpRijndael();
 			findSelfIpAddress();
 		}
 		
@@ -60,22 +62,26 @@ namespace Server
 
 		public static void AddUser(TcpClient tcpUser, string strUsername, Encryption encryption)
 		{
+			// create new user
+			User user = new User();
+			user.Username = strUsername;
+			user.TcpClient = tcpUser;
+			user.Encryption = encryption;
+			
 			ChatServer.users.Add(strUsername);
-			ChatServer.htUsers.Add(strUsername, tcpUser);
-			ChatServer.htConnections.Add(tcpUser, strUsername);
-			ChatServer.htEncryptions.Add(tcpUser, encryption);
-			SendAdminMessage(htConnections[tcpUser] + " has joined us");
+			ChatServer.userInfos.Add(strUsername, user);
+
+			SendAdminMessage(strUsername + " has joined us");
 		}
 		
-		public static void RemoveUser(TcpClient tcpUser)
+		public static void RemoveUser(string username)
 		{
-			if (htConnections[tcpUser] != null)
+			if (ChatServer.userInfos.ContainsKey(username) == true)
 			{
-				SendAdminMessage(htConnections[tcpUser] + " has left us");
-				ChatServer.users.Remove(ChatServer.htConnections[tcpUser].ToString());
-				ChatServer.htUsers.Remove(ChatServer.htConnections[tcpUser]);
-				ChatServer.htEncryptions.Remove(htConnections[tcpUser]);
-				ChatServer.htConnections.Remove(tcpUser);
+				SendAdminMessage(username + " has left us");
+				
+				ChatServer.users.Remove(username);
+				ChatServer.userInfos.Remove(username);				
 			}
 		}
 		
@@ -95,20 +101,19 @@ namespace Server
 			adminMessage.Transmitter = "Administrator";
 			adminMessage.Receiver = "global";
 			adminMessage.Message = Message;
+			
 			e = new StatusChangedEventArgs(adminMessage);
 			OnStatusChanged(e);
-			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
-			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
-			for (int i = 0; i < tcpClients.Length; i++)
-			{
+			
+			foreach (KeyValuePair<string, User> entry in ChatServer.userInfos) {
 				try
 				{
-					if (Message.Trim() == "" || tcpClients[i] == null)
+					if (Message.Trim() == "")
 					{
 						continue;
 					}
-					Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
-					swSender = new BinaryWriter(tcpClients[i].GetStream());
+					Encryption tmp = entry.Value.Encryption;
+					swSender = new BinaryWriter(entry.Value.TcpClient.GetStream());
 					byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(adminMessage));
 					swSender.Write(sendMessage.Length);
 					swSender.Flush();
@@ -118,7 +123,7 @@ namespace Server
 				}
 				catch
 				{
-					RemoveUser(tcpClients[i]);
+					RemoveUser(entry.Key);
 				}
 			}
 		}
@@ -130,24 +135,24 @@ namespace Server
 			userMessage.Transmitter = From;
 			userMessage.Message = Message;
 			userMessage.Receiver = Receiver;
+			
 			e = new StatusChangedEventArgs(userMessage);
 			OnStatusChanged(e);
-			TcpClient[] tcpClients = new TcpClient[ChatServer.htUsers.Count];
-			ChatServer.htUsers.Values.CopyTo(tcpClients, 0);
+			
 			if (Receiver == "global")
 			{
-				for (int i = 0; i < tcpClients.Length; i++)
+				foreach (KeyValuePair<string, User> entry in ChatServer.userInfos)
 				{
 					try
 					{
-						if (Message.Trim() == "" || tcpClients[i] == null)
+						if (Message.Trim() == "")
 						{
 							continue;
 						}
 						else
 						{
-							Encryption tmp = (Encryption)ChatServer.htEncryptions[tcpClients[i]];
-							swSender = new BinaryWriter(tcpClients[i].GetStream());
+							Encryption tmp = entry.Value.Encryption;
+							swSender = new BinaryWriter(entry.Value.TcpClient.GetStream());
 							userMessage.Message = Message;
 							byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
 							swSender.Write(sendMessage.Length);
@@ -159,14 +164,15 @@ namespace Server
 					}
 					catch
 					{
-						RemoveUser(tcpClients[i]);
+						RemoveUser(entry.Key);
 					}
 				}
 			}
 			else
 			{
-				Encryption tmp = (Encryption)ChatServer.htEncryptions[ChatServer.htUsers[Receiver]];
-				TcpClient connection = (TcpClient) ChatServer.htUsers[Receiver];
+				User user = ChatServer.userInfos[Receiver];
+				Encryption tmp = user.Encryption;
+				TcpClient connection = user.TcpClient;
 				swSender = new BinaryWriter(connection.GetStream());
 				userMessage.Message = Message;
 				byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
@@ -198,7 +204,7 @@ namespace Server
 			while (ServRunning == true)
 			{
 				tcpClient = tlsClient.AcceptTcpClient();
-				Connection newConnection = new Connection(tcpClient, _self);
+				Connection newConnection = new Connection(tcpClient, serverEncryption);
 			}
 		}
 		
@@ -267,7 +273,7 @@ namespace Server
         
         public string getRSAPublic()
         {
-        	return _self.getPublicKey();
+        	return serverEncryption.getPublicKey();
         }
 	}
 }

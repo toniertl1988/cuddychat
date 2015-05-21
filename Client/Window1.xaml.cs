@@ -125,6 +125,7 @@ namespace Client
 							_privateChats.Add(transmitter, newWindow);
 					    }
 						PrivateWindow partnerWindow = (PrivateWindow) _privateChats[transmitter];
+                        partnerWindow.Show();
 						transmitter = transmitter + ": ";
 						partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
 						partnerWindow.txtLog.ScrollToEnd();
