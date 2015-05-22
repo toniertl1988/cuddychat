@@ -223,7 +223,7 @@
 					KeyDown="txtMessage_KeyPress"
 					AcceptsReturn="True"
 					Height="31"
-					Width="230"
+					Width="350"
 					Margin="3"
 					VerticalAlignment="Bottom"
 					HorizontalAlignment="Left"

@@ -138,7 +138,11 @@ namespace Client
 		{
 			if (txtMessage.Text.Length != 0)
 			{
-				SendMessage(txtMessage.Text, "global");
+				if (_client.connected == true) {
+					SendMessage(txtMessage.Text, "global");
+				} else {
+					MessageBox.Show("Mit keinem Server verbunden!");
+				}
 			}
 		}
 		
@@ -239,18 +243,21 @@ namespace Client
 		{
 			if (_privateChats.ContainsKey(partner))
 		    {
-				_privateChats.Remove(partner);
+				PrivateWindow window = (PrivateWindow) _privateChats[partner];
+				window.Hide();
 		    }
 		}
 		
 		protected void openPrivateChat(string partner)
 		{
-			PrivateWindow window = new PrivateWindow(partner);
-			window.setOwner(this);
-			if (_privateChats.ContainsKey(partner)) {
-				_privateChats.Remove(partner);
+			PrivateWindow window;
+			if (_privateChats.ContainsKey(partner) == false) {
+				window = new PrivateWindow(partner);
+				window.setOwner(this);
+				_privateChats.Add(partner, window);
+			} else {
+				window = (PrivateWindow) _privateChats[partner];
 			}
-			_privateChats.Add(partner, window);
 			window.Show();
 		}
 	}

@@ -44,6 +44,8 @@ namespace Client
                     }
                 );
 			}
+			// add separator
+			smilieData.Add(new MyData() {code = "Custom Smileys"});
 		 	smileyGrid.DataContext = smilieData;
 		}
 	}
