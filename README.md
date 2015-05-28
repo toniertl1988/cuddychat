@@ -21,14 +21,18 @@ History
 
 Roadmap
 ======
-- version 1.1.09 - send user info to server for info of user on right click in user list in client
-- version 1.1.10 - single instance of server
-- version 1.1.11 - single instance of client
-- Version 1.1.12 - add smiley window
-- Version 1.1.13 - dynamic smiley add and parsing
+- Version 1.1.09 - send user info to server for info of user on right click in user list in client (login time, operating system)
 
-- Version 1.2 - private chats
+- Version 1.1.10 - add smiley window
 
-- Version 1.3 - file transfer with private chats
+- Version 1.2 - private chats - already working - focus after user info
 
-- Version 1.4 - login window + registration with server
+- Version 1.3 - file transfer with private chats - focus after user info
+
+- Version 1.4 - dynamic smiley add and parsing
+
+- Version 1.5 - single instances
+- Version 1.5.01 - single instance of server
+- Version 1.5.02 - single instance of client
+
+- Version 1.6 - login window + registration with server
