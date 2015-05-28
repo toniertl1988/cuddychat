@@ -80,6 +80,8 @@ namespace Server
 			{
 				SendAdminMessage(username + " has left us");
 				
+				User user = ChatServer.userInfos[username];
+				user.TcpClient.Close();				
 				ChatServer.users.Remove(username);
 				ChatServer.userInfos.Remove(username);				
 			}

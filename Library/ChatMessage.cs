@@ -18,6 +18,16 @@ namespace Library
 	[Serializable()]
 	public class Chatmessage
 	{
+		public const string MESSAGE_TYPE_MESSAGE = "message";
+		
+		public const string MESSAGE_TYPE_USER_INFO = "user-info";
+		
+		public const string MESSAGE_TYPE_CONNECT = "connect";
+		
+		public const string MESSAGE_TYPE_DISCONNECT = "disconnect";
+			
+		public const string MESSAGE_TYPE_FILE_TRANSFER = "file-transfer";
+		
 		protected string _transmitter;
 		
 		protected string _receiver = "global";
@@ -27,6 +37,8 @@ namespace Library
 		protected string _signature = "C0dd1Ch2tCli3nt";
 		
 		protected OperatingSystem _operatingSystem;
+		
+		protected string _messageType = Chatmessage.MESSAGE_TYPE_MESSAGE;
 		
 		public string Signature {
 			get { return _signature; }
@@ -50,6 +62,11 @@ namespace Library
 		public OperatingSystem OperatingSystem {
 			get { return _operatingSystem; }
 			set { _operatingSystem = value; }
+		}
+		
+		public string MessageType {
+			get { return _messageType; }
+			set { _messageType = value; }
 		}
 		
 	}

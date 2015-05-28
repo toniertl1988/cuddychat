@@ -171,7 +171,7 @@ namespace Server
 					     ChatServer.RemoveUser(currUser);
 					 }
 					 
-					 else if (chatResponse.Message == "ClosingChatServerConnectionRequest")
+					 else if (chatResponse.MessageType == Chatmessage.MESSAGE_TYPE_DISCONNECT)
 					 {
 					 	ChatServer.RemoveUser(currUser);
 					 }

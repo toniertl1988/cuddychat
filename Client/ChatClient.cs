@@ -45,7 +45,7 @@ namespace Client
 		
 		private Thread _thrMessaging;
 		
-		private Encryption _self;
+		private Encryption _clientEncryption;
 		
 		private string _user;
 				
@@ -54,7 +54,7 @@ namespace Client
 		
 		public ChatClient()
 		{
-			_self = new Encryption();
+			_clientEncryption = new Encryption();
 		}
 		
 		public void InitializeConnection(string IP, string User)
@@ -87,7 +87,7 @@ namespace Client
 			_srReceiver = new BinaryReader(_tcpServer.GetStream());
 			
 			// sende meinen public key zum server
-			byte[] myPubKey = Converter.fromStringToByteArray(_self.getPublicKey());
+			byte[] myPubKey = Converter.fromStringToByteArray(_clientEncryption.getPublicKey());
 			// sende länge
 			_swSender.Write(myPubKey.Length);
 			_swSender.Flush();
@@ -100,22 +100,23 @@ namespace Client
 			length = _srReceiver.ReadInt32();
 			response = new byte[length];
 			response = _srReceiver.ReadBytes(length);
-			byte[] rijKey = _self.DecryptRSA(response);
+			byte[] rijKey = _clientEncryption.DecryptRSA(response);
 			length = _srReceiver.ReadInt32();
 			response = new byte[length];
 			response = _srReceiver.ReadBytes(length);
-			byte[] rijIV = _self.DecryptRSA(response);
+			byte[] rijIV = _clientEncryption.DecryptRSA(response);
 			
 			// setup rij für spätere kommunikation
-			_self.setUpRijndael(rijKey, rijIV);
+			_clientEncryption.setUpRijndael(rijKey, rijIV);
 			
 			// sende chatmessage klasse mit signature, usernamen und willkommensnachricht
 			Library.Chatmessage message = new Library.Chatmessage();
 			message.Transmitter = User;
 			message.Message = "Welcome";
+			message.MessageType = Library.Chatmessage.MESSAGE_TYPE_CONNECT;
 			message.OperatingSystem = Environment.OSVersion;
 			
-			answer = _self.EncryptRijndael(Converter.fromObjectToByteArray(message));
+			answer = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(message));
 			_swSender.Write(answer.Length);
 			_swSender.Flush();
 			_swSender.Write(answer);
@@ -141,7 +142,7 @@ namespace Client
 			Int32 messageLength = Convert.ToInt32(_srReceiver.ReadInt32());
 			byte[] response = new byte[messageLength];
 			response = _srReceiver.ReadBytes(messageLength);
-			Chatmessage ConResponse = (Chatmessage) Converter.fromByteArrayToObject(_self.DecryptRijndael(response));
+			Chatmessage ConResponse = (Chatmessage) Converter.fromByteArrayToObject(_clientEncryption.DecryptRijndael(response));
 			
 			if (ConResponse.Message[0] == '1')
 			{
@@ -178,23 +179,26 @@ namespace Client
 				messageLength = Convert.ToInt32(_srReceiver.ReadInt32());
 				response = new byte[messageLength];
 				response = _srReceiver.ReadBytes(messageLength);
-				e = new StatusChangedEventArgs((Chatmessage) Converter.fromByteArrayToObject(_self.DecryptRijndael(response)));
+				e = new StatusChangedEventArgs((Chatmessage) Converter.fromByteArrayToObject(_clientEncryption.DecryptRijndael(response)));
 				OnStatusChanged(e);
 			}
 		}
 		
 		public void closeConnection(string Reason)
 		{
-			connected = false;
-			Chatmessage message = new Chatmessage();
-			message.Transmitter = _user;
-			message.Receiver = "global";
-			message.Message = "ClosingChatServerConnectionRequest";
-			sendMessage("ClosingChatServerConnectionRequest");
+			if (connected) {
+				connected = false;
+				Chatmessage message = new Chatmessage();
+				message.Transmitter = _user;
+				message.Receiver = "global";
+				message.Message = "ClosingChatServerConnectionRequest";
+				message.MessageType = Chatmessage.MESSAGE_TYPE_DISCONNECT;
+				sendMessage(message);
 			
-			// needed here?!
-			//e = new StatusChangedEventArgs(message);
-			//OnStatusChanged(e);
+				// needed here?!
+				//e = new StatusChangedEventArgs(message);
+				//OnStatusChanged(e);
+			}
 			
 			_users.Clear();
 			if (_thrMessaging != null) {
@@ -219,7 +223,16 @@ namespace Client
 			chatMessage.Transmitter = _user;
 			chatMessage.Receiver = "global";
 			chatMessage.Message = message;
-			byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
+			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
+			_swSender.Write(msg.Length);
+			_swSender.Flush();
+			_swSender.Write(msg);
+			_swSender.Flush();
+		}
+		
+		public void sendMessage(Chatmessage message)
+		{
+			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(message));
 			_swSender.Write(msg.Length);
 			_swSender.Flush();
 			_swSender.Write(msg);
@@ -232,7 +245,7 @@ namespace Client
 			chatMessage.Transmitter = _user;
 			chatMessage.Receiver = receiver;
 			chatMessage.Message = message;
-			byte[] msg = _self.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
+			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
 			_swSender.Write(msg.Length);
 			_swSender.Flush();
 			_swSender.Write(msg);
@@ -246,7 +259,7 @@ namespace Client
 		
 		public string getPublicKey()
 		{
-			return _self.getPublicKey();
+			return _clientEncryption.getPublicKey();
 		}
 		
 		public bool checkIfServerIsReachable()
