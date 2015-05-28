@@ -88,12 +88,7 @@ namespace Client
 			
 			// sende meinen public key zum server
 			byte[] myPubKey = Converter.fromStringToByteArray(_clientEncryption.getPublicKey());
-			// sende länge
-			_swSender.Write(myPubKey.Length);
-			_swSender.Flush();
-			// sende pubKey
-			_swSender.Write(myPubKey);
-			_swSender.Flush();
+			sendMessage(myPubKey);
 			
 			// empfange rij key + iv vom server (verschlüsselt mit meinem pub key)
 			Int32 length;
@@ -117,10 +112,7 @@ namespace Client
 			message.OperatingSystem = Environment.OSVersion;
 			
 			answer = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(message));
-			_swSender.Write(answer.Length);
-			_swSender.Flush();
-			_swSender.Write(answer);
-			_swSender.Flush();
+			sendMessage(answer);
 			
 			_thrMessaging = new Thread(new ThreadStart(ReceiveMessages));
 			_thrMessaging.IsBackground = true;
@@ -224,19 +216,13 @@ namespace Client
 			chatMessage.Receiver = "global";
 			chatMessage.Message = message;
 			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
-			_swSender.Write(msg.Length);
-			_swSender.Flush();
-			_swSender.Write(msg);
-			_swSender.Flush();
+			sendMessage(msg);
 		}
 		
 		public void sendMessage(Chatmessage message)
 		{
 			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(message));
-			_swSender.Write(msg.Length);
-			_swSender.Flush();
-			_swSender.Write(msg);
-			_swSender.Flush();
+			sendMessage(msg);
 		}
 		
 		public void sendMessage(string message, string receiver)
@@ -246,10 +232,7 @@ namespace Client
 			chatMessage.Receiver = receiver;
 			chatMessage.Message = message;
 			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
-			_swSender.Write(msg.Length);
-			_swSender.Flush();
-			_swSender.Write(msg);
-			_swSender.Flush();
+			sendMessage(msg);
 		}
 		
 		public TcpClient getTcpServer()
@@ -300,6 +283,14 @@ namespace Client
 		public List<string> getUsers()
 		{
 			return _users;
+		}
+		
+		protected void sendMessage(byte[] message)
+		{
+			_swSender.Write(message.Length);
+			_swSender.Flush();
+			_swSender.Write(message);
+			_swSender.Flush();
 		}
 	}
 }

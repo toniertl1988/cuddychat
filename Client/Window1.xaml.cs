@@ -98,21 +98,20 @@ namespace Client
 			}
 			if (strMessage.Length != 0)
 			{
+				string completeMessage = transmitter + ": " + strMessage;
 				if (transmitter == "Administrator")
 				{
-					transmitter = transmitter + ": ";
-					txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
+					txtLog.Document.Blocks.Add( _parser.parse(completeMessage));
 					txtLog.ScrollToEnd();
-					if (_client.checkIfAdminMessage(transmitter + strMessage) == true)
+					if (_client.checkIfAdminMessage(completeMessage) == true)
 					{
-						_client.manageAdminMessage(transmitter + strMessage);
+						_client.manageAdminMessage(completeMessage);
 						listUser.ItemsSource = new ObservableCollection<string>(_client.getUsers());
 					}
 				} else {
 					if (receiver == "global")
 					{
-						transmitter = transmitter + ": ";
-						txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
+						txtLog.Document.Blocks.Add( _parser.parse(completeMessage));
 						txtLog.ScrollToEnd();
 					}
 					else
@@ -126,8 +125,7 @@ namespace Client
 					    }
 						PrivateWindow partnerWindow = (PrivateWindow) _privateChats[transmitter];
                         partnerWindow.Show();
-						transmitter = transmitter + ": ";
-						partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(transmitter + strMessage));
+						partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(completeMessage));
 						partnerWindow.txtLog.ScrollToEnd();
 					}
 				}
