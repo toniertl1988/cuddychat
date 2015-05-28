@@ -67,15 +67,9 @@ namespace Server
 			
 			// sende mit client pub key verschlüsselt rij key + iv
 			answer = clientEncryption.EncryptRSA(serverEncryption.getRijKey());
-			swSender.Write(answer.Length);
-			swSender.Flush();
-			swSender.Write(answer);
-			swSender.Flush();
+			sendMessage(answer);
 			answer = clientEncryption.EncryptRSA(serverEncryption.getRijIV());
-			swSender.Write(answer.Length);
-			swSender.Flush();
-			swSender.Write(answer);
-			swSender.Flush();
+			sendMessage(answer);
 			
 			// empfange chatmessage objekt mit usernamen signature und message
 			length = srReceiver.ReadInt32();
@@ -98,10 +92,7 @@ namespace Server
 				{
 					serverResponse.Message = "0|Wrong Client.";
 					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
-					swSender.Write(msg.Length);
-					swSender.Flush();
-					swSender.Write(msg);
-					swSender.Flush();
+					sendMessage(msg);
 					CloseConnection();
 					return;
 				}
@@ -109,10 +100,7 @@ namespace Server
 				{
 					serverResponse.Message = "0|This username already exists.";
 					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
-					swSender.Write(msg.Length);
-					swSender.Flush();
-					swSender.Write(msg);
-					swSender.Flush();
+					sendMessage(msg);
 					CloseConnection();
 					return;
 				}
@@ -120,10 +108,7 @@ namespace Server
 				{
 					serverResponse.Message = "0|This username is reserved.";
 					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
-					swSender.Write(msg.Length);
-					swSender.Flush();
-					swSender.Write(msg);
-					swSender.Flush();
+					sendMessage(msg);
 					CloseConnection();
 					return;
 				}
@@ -131,21 +116,14 @@ namespace Server
 				{
 					serverResponse.Message = "1|Connected Successfully";
 					byte[] msg = serverEncryption.EncryptRijndael(Converter.fromObjectToByteArray(serverResponse));
-					swSender.Write(msg.Length);
-					swSender.Flush();
-					swSender.Write(msg, 0, msg.Length);
-					swSender.Flush();
+					sendMessage(msg);
 					
 					// send actual user list
 					MemoryStream stream = new MemoryStream();
 					BinaryFormatter bf = new BinaryFormatter();
 					bf.Serialize(stream, ChatServer.users);
 					msg = stream.ToArray();
-					Int32 msgLength = msg.Length;
-					swSender.Write(msgLength);
-					swSender.Flush();
-					swSender.Write(msg);
-					swSender.Flush();
+					sendMessage(msg);
 					
 					// add new user
 					ChatServer.AddUser(tcpClient, currUser, serverEncryption);
@@ -166,18 +144,23 @@ namespace Server
 					 var rawResponse = Converter.fromByteArrayToObject(serverEncryption.DecryptRijndael(response));
 					 Chatmessage chatResponse = (Chatmessage) rawResponse;
 					 
-					 if (chatResponse.Message == null)
-					 {
-					     ChatServer.RemoveUser(currUser);
-					 }
-					 
-					 else if (chatResponse.MessageType == Chatmessage.MESSAGE_TYPE_DISCONNECT)
-					 {
-					 	ChatServer.RemoveUser(currUser);
-					 }
-					 else 
-					 {
-				 		ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver);
+					 switch (chatResponse.MessageType) {
+					 	case Chatmessage.MESSAGE_TYPE_DISCONNECT:
+					 		// client wants do disconnect
+					 		ChatServer.RemoveUser(currUser);
+					 		break;
+					 	case Chatmessage.MESSAGE_TYPE_USER_INFO:
+					 		// send user info of a user to client
+					 		break;
+					 	case Chatmessage.MESSAGE_TYPE_MESSAGE:
+				 		default:
+					 		// normal chat message or default behaviour
+					 		if (chatResponse.Message.Length > 0) {
+					 			ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver);
+					 		} else {
+					 			ChatServer.RemoveUser(currUser);
+					 		}
+				 			break;
 					 }
 				}
 			}
@@ -185,6 +168,14 @@ namespace Server
 			{
 				ChatServer.RemoveUser(currUser);
 			}
+		}
+		
+		protected void sendMessage(byte[] msg)
+		{
+			swSender.Write(msg.Length);
+			swSender.Flush();
+			swSender.Write(msg);
+			swSender.Flush();
 		}
 	}
 }

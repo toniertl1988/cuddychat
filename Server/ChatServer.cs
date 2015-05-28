@@ -67,6 +67,7 @@ namespace Server
 			user.Username = strUsername;
 			user.TcpClient = tcpUser;
 			user.Encryption = encryption;
+			user.LoginTime = new DateTime();
 			
 			ChatServer.users.Add(strUsername);
 			ChatServer.userInfos.Add(strUsername, user);
@@ -141,28 +142,21 @@ namespace Server
 			e = new StatusChangedEventArgs(userMessage);
 			OnStatusChanged(e);
 			
-			if (Receiver == "global")
+			if (Receiver == "global" && Message.Trim() != "")
 			{
 				foreach (KeyValuePair<string, User> entry in ChatServer.userInfos)
 				{
 					try
 					{
-						if (Message.Trim() == "")
-						{
-							continue;
-						}
-						else
-						{
-							Encryption tmp = entry.Value.Encryption;
-							swSender = new BinaryWriter(entry.Value.TcpClient.GetStream());
-							userMessage.Message = Message;
-							byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
-							swSender.Write(sendMessage.Length);
-							swSender.Flush();
-							swSender.Write(sendMessage);
-							swSender.Flush();
-							swSender = null;
-						}
+						Encryption tmp = entry.Value.Encryption;
+						swSender = new BinaryWriter(entry.Value.TcpClient.GetStream());
+						userMessage.Message = Message;
+						byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
+						swSender.Write(sendMessage.Length);
+						swSender.Flush();
+						swSender.Write(sendMessage);
+						swSender.Flush();
+						swSender = null;
 					}
 					catch
 					{

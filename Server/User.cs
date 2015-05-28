@@ -24,6 +24,8 @@ namespace Server
 		
 		protected Encryption encryption;
 		
+		protected DateTime loginTime;
+		
 		public string Username {
 			get { return username; }
 			set { username = value; }
@@ -37,6 +39,11 @@ namespace Server
 		public Encryption Encryption {
 			get { return encryption; }
 			set { encryption = value; }
+		}
+		
+		public DateTime LoginTime {
+			get { return loginTime; }
+			set { loginTime = value; }
 		}
 	}
 }
