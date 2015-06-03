@@ -19,6 +19,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using Library;
 
 namespace Server
 {
@@ -29,7 +30,7 @@ namespace Server
 	
 	public partial class Window1 : Window
 	{
-		private delegate void UpdateStatusCallback(string strMessage);
+		private delegate void UpdateStatusCallback(string strMessage, string MessageType);
 
         private ChatServer mainServer;
 		
@@ -49,7 +50,7 @@ namespace Server
 				if (mainServer.StartListening() == false) {
 					MessageBox.Show("Server konnte nicht gestartet werden!");
 				} else {
-					this.UpdateStatus("Monitoring for connections...");
+					this.UpdateStatus("Monitoring for connections...", Chatmessage.MESSAGE_TYPE_MESSAGE);
 					btnListen.Content = "Stop Listening";
 					txtIp.IsEnabled = false;
 				}
@@ -58,7 +59,7 @@ namespace Server
 			{
 				mainServer.StopListening();
 				btnListen.Content = "Start Listening";
-				this.UpdateStatus("Stop Monitoring");
+				this.UpdateStatus("Stop Monitoring", Chatmessage.MESSAGE_TYPE_MESSAGE);
 				txtIp.IsEnabled = true;
 			}
 		}
@@ -67,30 +68,31 @@ namespace Server
 		{
     		// Call the method that updates the form
     		try {
-    			this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage.Message });
+    			this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage.Message, e.EventMessage.MessageType });
     		} catch (Exception) {
     			// do nothing
     		}
     		
 		}
 		
-		private void UpdateStatus(string strMessage)
+		private void UpdateStatus(string strMessage, string MessageType)
 		{
-			DateTime today = DateTime.Now;
-			string text = "(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r";
-			if (strMessage.IndexOf("Admin") == -1)
-			{
-				if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true")
+			if (MessageType != Chatmessage.MESSAGE_TYPE_USER_INFO) {
+				DateTime today = DateTime.Now;
+				string text = "(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r";
+				if (strMessage.IndexOf("Admin") == -1)
+				{
+					if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true")
+					{
+						txtLog.AppendText(text);
+					}
+			    }
+				else
 				{
 					txtLog.AppendText(text);
 				}
-		    }
-			else
-			{
-				txtLog.AppendText(text);
+				txtLog.ScrollToEnd();
 			}
-			txtLog.ScrollToEnd();
-			
 		}
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

@@ -27,6 +27,7 @@ using System.Windows.Media.Imaging;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using Library;
 
 namespace Client
 {
@@ -36,7 +37,7 @@ namespace Client
 	public partial class Window1 : Window
 	{
 		// Needed to update the form with messages from another thread
-		private delegate void UpdateLogCallback(string strMessage, string transmitter, string receiver);
+		private delegate void UpdateLogCallback(string strMessage, string transmitter, string receiver, string MessageType);
 		// Needed to set the form to a "disconnected" state from another thread
 		private delegate void CloseConnectionCallback(string strReason);
 		
@@ -82,7 +83,7 @@ namespace Client
 			}
 		}
 		
-		private void UpdateGui(string strMessage, string transmitter, string receiver)
+		private void UpdateGui(string strMessage, string transmitter, string receiver, string MessageType)
 		{
 			if (_client.connected == true)
 			{
@@ -116,17 +117,21 @@ namespace Client
 					}
 					else
 					{
-						if (_privateChats.ContainsKey(transmitter) == false)
-					    {
-							PrivateWindow newWindow = new PrivateWindow(transmitter);
-							newWindow.setOwner(this);
-							newWindow.Show();
-							_privateChats.Add(transmitter, newWindow);
-					    }
-						PrivateWindow partnerWindow = (PrivateWindow) _privateChats[transmitter];
-                        partnerWindow.Show();
-						partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(completeMessage));
-						partnerWindow.txtLog.ScrollToEnd();
+						if (MessageType == Chatmessage.MESSAGE_TYPE_USER_INFO) {
+							MessageBox.Show(strMessage);
+						} else {
+							if (_privateChats.ContainsKey(transmitter) == false)
+						    {
+								PrivateWindow newWindow = new PrivateWindow(transmitter);
+								newWindow.setOwner(this);
+								newWindow.Show();
+								_privateChats.Add(transmitter, newWindow);
+						    }
+							PrivateWindow partnerWindow = (PrivateWindow) _privateChats[transmitter];
+	                        partnerWindow.Show();
+							partnerWindow.txtLog.Document.Blocks.Add( _parser.parse(completeMessage));
+							partnerWindow.txtLog.ScrollToEnd();
+						}
 					}
 				}
 			}
@@ -211,12 +216,17 @@ namespace Client
 		public void mainServer_StatusChanged(object sender, StatusChangedEventArgs e)
 		{
     		// Call the method that updates the form
-    		this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateGui), new object[] { e.EventMessage.Message, e.EventMessage.Transmitter, e.EventMessage.Receiver });
+    		this.Dispatcher.Invoke(new UpdateLogCallback(this.UpdateGui), new object[] { e.EventMessage.Message, e.EventMessage.Transmitter, e.EventMessage.Receiver, e.EventMessage.MessageType });
 		}
 		
 		public void openUserInfo(object sender, EventArgs e)
 		{
-			MessageBox.Show(listUser.SelectedItem.ToString());
+			Chatmessage message = new Chatmessage();
+			message.MessageType = Chatmessage.MESSAGE_TYPE_USER_INFO;
+			message.Transmitter = txtUser.Text;
+			message.Receiver = listUser.SelectedItem.ToString();
+			message.Message = "userInfo";
+			_client.sendMessage(message);
 		}
 		
 		public void TxtUser_KeyDown(object sender, KeyEventArgs e)

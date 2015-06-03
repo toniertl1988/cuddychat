@@ -126,7 +126,7 @@ namespace Server
 					sendMessage(msg);
 					
 					// add new user
-					ChatServer.AddUser(tcpClient, currUser, serverEncryption);
+					ChatServer.AddUser(tcpClient, currUser, serverEncryption, message.OperatingSystem);
 				}
 			}
 			else
@@ -151,12 +151,13 @@ namespace Server
 					 		break;
 					 	case Chatmessage.MESSAGE_TYPE_USER_INFO:
 					 		// send user info of a user to client
+					 		ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver, Chatmessage.MESSAGE_TYPE_USER_INFO);
 					 		break;
 					 	case Chatmessage.MESSAGE_TYPE_MESSAGE:
 				 		default:
 					 		// normal chat message or default behaviour
 					 		if (chatResponse.Message.Length > 0) {
-					 			ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver);
+					 			ChatServer.SendMessage(currUser, chatResponse.Message, chatResponse.Receiver, Chatmessage.MESSAGE_TYPE_MESSAGE);
 					 		} else {
 					 			ChatServer.RemoveUser(currUser);
 					 		}

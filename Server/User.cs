@@ -26,6 +26,8 @@ namespace Server
 		
 		protected DateTime loginTime;
 		
+		protected OperatingSystem operatingSystem;
+		
 		public string Username {
 			get { return username; }
 			set { username = value; }
@@ -44,6 +46,11 @@ namespace Server
 		public DateTime LoginTime {
 			get { return loginTime; }
 			set { loginTime = value; }
+		}
+		
+		public OperatingSystem OperatingSystem {
+			get { return operatingSystem; }
+			set { operatingSystem = value; }
 		}
 	}
 }

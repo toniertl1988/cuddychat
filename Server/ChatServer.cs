@@ -60,14 +60,15 @@ namespace Server
 			}
 		}
 
-		public static void AddUser(TcpClient tcpUser, string strUsername, Encryption encryption)
+		public static void AddUser(TcpClient tcpUser, string strUsername, Encryption encryption, OperatingSystem operatingSystem)
 		{
 			// create new user
 			User user = new User();
 			user.Username = strUsername;
 			user.TcpClient = tcpUser;
 			user.Encryption = encryption;
-			user.LoginTime = new DateTime();
+			user.LoginTime = DateTime.Now;
+			user.OperatingSystem = operatingSystem;
 			
 			ChatServer.users.Add(strUsername);
 			ChatServer.userInfos.Add(strUsername, user);
@@ -99,46 +100,24 @@ namespace Server
 		
 		public static void SendAdminMessage(string Message)
 		{
-			BinaryWriter swSender;
-			Chatmessage adminMessage = new Chatmessage();
-			adminMessage.Transmitter = "Administrator";
-			adminMessage.Receiver = "global";
-			adminMessage.Message = Message;
+			Chatmessage adminMessage = new Chatmessage("Administrator", "global", Message, Library.Chatmessage.MESSAGE_TYPE_MESSAGE);
 			
 			e = new StatusChangedEventArgs(adminMessage);
 			OnStatusChanged(e);
 			
 			foreach (KeyValuePair<string, User> entry in ChatServer.userInfos) {
-				try
-				{
-					if (Message.Trim() == "")
-					{
-						continue;
-					}
-					Encryption tmp = entry.Value.Encryption;
-					swSender = new BinaryWriter(entry.Value.TcpClient.GetStream());
-					byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(adminMessage));
-					swSender.Write(sendMessage.Length);
-					swSender.Flush();
-					swSender.Write(sendMessage);
-					swSender.Flush();
-					swSender = null;
-				}
-				catch
-				{
-					RemoveUser(entry.Key);
-				}
+				sendMessage(adminMessage, entry.Value);
 			}
 		}
 		
-		public static void SendMessage(string From, string Message, string Receiver)
+		public static void SendMessage(string From, string Message, string Receiver, string MessageType)
 		{
-			BinaryWriter swSender;
-			Chatmessage userMessage = new Chatmessage();
-			userMessage.Transmitter = From;
-			userMessage.Message = Message;
-			userMessage.Receiver = Receiver;
-			
+			if (MessageType == Chatmessage.MESSAGE_TYPE_USER_INFO) {
+				Message = "Login: " + ChatServer.userInfos[From].LoginTime.ToLongDateString() + " " + ChatServer.userInfos[From].LoginTime.ToLongTimeString()
+					+ Environment.NewLine 
+					+ "Operating System: " + ChatServer.userInfos[From].OperatingSystem.VersionString;
+			}
+			Chatmessage userMessage = new Chatmessage(From, Receiver, Message, MessageType);
 			e = new StatusChangedEventArgs(userMessage);
 			OnStatusChanged(e);
 			
@@ -146,37 +125,32 @@ namespace Server
 			{
 				foreach (KeyValuePair<string, User> entry in ChatServer.userInfos)
 				{
-					try
-					{
-						Encryption tmp = entry.Value.Encryption;
-						swSender = new BinaryWriter(entry.Value.TcpClient.GetStream());
-						userMessage.Message = Message;
-						byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
-						swSender.Write(sendMessage.Length);
-						swSender.Flush();
-						swSender.Write(sendMessage);
-						swSender.Flush();
-						swSender = null;
-					}
-					catch
-					{
-						RemoveUser(entry.Key);
-					}
+					sendMessage(userMessage, entry.Value);
 				}
 			}
 			else
 			{
-				User user = ChatServer.userInfos[Receiver];
+				sendMessage(userMessage, ChatServer.userInfos[Receiver]);
+			}
+		}
+		
+		protected static void sendMessage(Chatmessage message, User user)
+		{
+			BinaryWriter swSender;
+			try
+			{
 				Encryption tmp = user.Encryption;
-				TcpClient connection = user.TcpClient;
-				swSender = new BinaryWriter(connection.GetStream());
-				userMessage.Message = Message;
-				byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(userMessage));
+				swSender = new BinaryWriter(user.TcpClient.GetStream());
+				byte[] sendMessage = tmp.EncryptRijndael(Converter.fromObjectToByteArray(message));
 				swSender.Write(sendMessage.Length);
 				swSender.Flush();
 				swSender.Write(sendMessage);
 				swSender.Flush();
 				swSender = null;
+			}
+			catch
+			{
+				RemoveUser(user.Username);
 			}
 		}
 		

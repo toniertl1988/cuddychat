@@ -40,6 +40,31 @@ namespace Library
 		
 		protected string _messageType = Chatmessage.MESSAGE_TYPE_MESSAGE;
 		
+		public Chatmessage()
+		{
+			
+		}
+		
+		public Chatmessage(string Transmitter)
+		{
+			_transmitter = Transmitter;
+		}
+		
+		public Chatmessage(string Transmitter, string Receiver) : this(Transmitter)
+		{
+			_receiver = Receiver;
+		}
+		
+		public Chatmessage(string Transmitter, string Receiver, string Message) : this(Transmitter, Receiver)
+		{
+			_message = Message;
+		}
+		
+		public Chatmessage(string Transmitter, string Receiver, string Message, string MessageType) : this(Transmitter, Receiver, Message)
+		{
+			_messageType = MessageType;
+		}
+		
 		public string Signature {
 			get { return _signature; }
 		}
