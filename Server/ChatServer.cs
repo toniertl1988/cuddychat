@@ -112,8 +112,12 @@ namespace Server
 		
 		public static void SendMessage(string From, string Message, string Receiver, string MessageType)
 		{
+			// overwrite message with specific user info message
 			if (MessageType == Chatmessage.MESSAGE_TYPE_USER_INFO) {
-				Message = "Login: " + ChatServer.userInfos[From].LoginTime.ToLongDateString() + " " + ChatServer.userInfos[From].LoginTime.ToLongTimeString()
+				Message = "Login: " 
+					+ ChatServer.userInfos[From].LoginTime.ToLongDateString() 
+					+ " " 
+					+ ChatServer.userInfos[From].LoginTime.ToLongTimeString()
 					+ Environment.NewLine 
 					+ "Operating System: " + ChatServer.userInfos[From].OperatingSystem.VersionString;
 			}

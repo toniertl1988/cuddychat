@@ -43,7 +43,9 @@
   <ItemGroup>
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Converter.cs" />
+    <Compile Include="Encryption.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatusChangedEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>
