@@ -28,6 +28,36 @@ namespace Server
 		
 		protected OperatingSystem operatingSystem;
 		
+		public User()
+		{
+			
+		}
+		
+		public User(string username)
+		{
+			this.username = Username;
+		}
+		
+		public User(string username, TcpClient tcpClient) : this(username)
+		{
+			this.tcpClient = tcpClient;
+		}
+		
+		public User(string username, TcpClient tcpClient, Encryption encryption) : this(username, tcpClient)
+		{
+			this.encryption = encryption;
+		}
+		
+		public User(string username, TcpClient tcpClient, Encryption encryption, DateTime loginTime) : this(username, tcpClient, encryption)
+		{
+			this.loginTime = loginTime;
+		}
+		
+		public User(string username, TcpClient tcpClient, Encryption encryption, DateTime loginTime, OperatingSystem operatingSystem) : this(username, tcpClient, encryption, loginTime)
+		{
+			this.operatingSystem = operatingSystem;
+		}
+		
 		public string Username {
 			get { return username; }
 			set { username = value; }

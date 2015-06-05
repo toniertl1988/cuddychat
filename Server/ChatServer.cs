@@ -63,12 +63,7 @@ namespace Server
 		public static void AddUser(TcpClient tcpUser, string strUsername, Encryption encryption, OperatingSystem operatingSystem)
 		{
 			// create new user
-			User user = new User();
-			user.Username = strUsername;
-			user.TcpClient = tcpUser;
-			user.Encryption = encryption;
-			user.LoginTime = DateTime.Now;
-			user.OperatingSystem = operatingSystem;
+			User user = new User(strUsername, tcpUser, encryption, DateTime.Now, operatingSystem);
 			
 			ChatServer.users.Add(strUsername);
 			ChatServer.userInfos.Add(strUsername, user);

@@ -189,7 +189,7 @@ namespace Client
 		
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-        	if (_client.getTcpServer() != null) {
+        	if (_client.connected != false) {
         		_client.closeConnection("Disconnect");
         	}
         	foreach (DictionaryEntry element in _privateChats) {
@@ -201,7 +201,7 @@ namespace Client
     	
     	public void closeApplication(object sender, EventArgs e)
     	{
-    		if (_client.getTcpServer() != null) {
+    		if (_client.connected != false) {
         		_client.closeConnection("Disconnect");
         	}
     		Application.Current.Shutdown();

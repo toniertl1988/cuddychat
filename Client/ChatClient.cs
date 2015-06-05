@@ -153,8 +153,6 @@ namespace Client
 				foreach (var element in user) {
 					_users.Add(element);
 				}
-				
-				
 			}
 			else if (ConResponse.Message[0] == '0')
 			{
@@ -233,16 +231,6 @@ namespace Client
 			chatMessage.Message = message;
 			byte[] msg = _clientEncryption.EncryptRijndael(Converter.fromObjectToByteArray(chatMessage));
 			sendMessage(msg);
-		}
-		
-		public TcpClient getTcpServer()
-		{
-			return this._tcpServer;
-		}
-		
-		public string getPublicKey()
-		{
-			return _clientEncryption.getPublicKey();
 		}
 		
 		public bool checkIfServerIsReachable()
