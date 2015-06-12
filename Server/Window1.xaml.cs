@@ -19,6 +19,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using System.Security.Principal;
 using Library;
 
 namespace Server
@@ -29,17 +30,36 @@ namespace Server
 	///	
 	
 	public partial class Window1 : Window
-	{
-		private delegate void UpdateStatusCallback(string strMessage, string MessageType);
+	{		
+		private delegate void UpdateStatusCallback(Chatmessage message);
 
         private ChatServer mainServer;
 		
 		public Window1()
 		{
+			CheckInstance();
 			InitializeComponent();
+			if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true") {
+				logUserMessagesMenuItem.IsChecked = true;
+			} else {
+				logUserMessagesMenuItem.IsChecked = false;
+			}
 			mainServer = new ChatServer();
 			txtIp.Text = mainServer.getSelfIpAddress();
 			ChatServer.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
+		}
+		
+		protected void CheckInstance()
+		{
+			bool ok;
+			string appName = "Cuddy-Chatclient-Server";
+			string mutex = WindowsIdentity.GetCurrent().Name.ToString();
+			mutex = mutex.Split('\\')[1] + appName;
+			Mutex m = new Mutex(true, mutex, out ok);
+			if (!ok) {
+				MessageBox.Show("Server already running");
+				Application.Current.Shutdown();
+			}
 		}
 		
 		private void btnListen_Click(object sender, EventArgs e)
@@ -50,7 +70,7 @@ namespace Server
 				if (mainServer.StartListening() == false) {
 					MessageBox.Show("Server konnte nicht gestartet werden!");
 				} else {
-					this.UpdateStatus("Monitoring for connections...", Chatmessage.MESSAGE_TYPE_MESSAGE);
+					this.UpdateStatus("Monitoring for connections...");
 					btnListen.Content = "Stop Listening";
 					txtIp.IsEnabled = false;
 				}
@@ -59,7 +79,7 @@ namespace Server
 			{
 				mainServer.StopListening();
 				btnListen.Content = "Start Listening";
-				this.UpdateStatus("Stop Monitoring", Chatmessage.MESSAGE_TYPE_MESSAGE);
+				this.UpdateStatus("Stop Monitoring");
 				txtIp.IsEnabled = true;
 			}
 		}
@@ -68,30 +88,32 @@ namespace Server
 		{
     		// Call the method that updates the form
     		try {
-    			this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage.Message, e.EventMessage.MessageType });
+    			this.Dispatcher.Invoke(new UpdateStatusCallback(this.UpdateStatus), new object[] { e.EventMessage });
     		} catch (Exception) {
     			// do nothing
     		}
     		
 		}
 		
-		private void UpdateStatus(string strMessage, string MessageType)
+		private void UpdateStatus(string strMessage)
 		{
-			if (MessageType != Chatmessage.MESSAGE_TYPE_USER_INFO) {
-				DateTime today = DateTime.Now;
-				string text = "(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r";
-				if (strMessage.IndexOf("Admin") == -1)
-				{
-					if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true")
-					{
-						txtLog.AppendText(text);
-					}
-			    }
-				else
-				{
-					txtLog.AppendText(text);
+			DateTime today = DateTime.Now;
+			string text = "(" + today.ToString("HH:mm:ss") + ") " + strMessage + "\r";
+			txtLog.AppendText(text);
+			txtLog.ScrollToEnd();
+		}
+		
+		private void UpdateStatus(Chatmessage message)
+		{
+			if (message.MessageType == Chatmessage.MESSAGE_TYPE_USER_INFO) {
+				return;
+			}
+			if (message.Transmitter == "Administrator") {
+				UpdateStatus(message.Message);
+			} else {
+				if (System.Configuration.ConfigurationManager.AppSettings["LogUserMessages"] == "true") {
+					UpdateStatus(message.Message);
 				}
-				txtLog.ScrollToEnd();
 			}
 		}
 

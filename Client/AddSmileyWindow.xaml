@@ -1,0 +1,12 @@
+﻿<Page x:Class="Client.AddSmileyWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	Title="Add a Smiley">
+	<Grid>
+	    <Grid.ColumnDefinitions>
+	        <ColumnDefinition Width="Auto" />
+	        <ColumnDefinition Width="Auto" />
+	        <ColumnDefinition Width="Auto" />
+    	</Grid.ColumnDefinitions>
+	</Grid>
+</Page>

@@ -79,6 +79,10 @@
     <ApplicationDefinition Include="App.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddSmileyWindow.xaml.cs">
+      <DependentUpon>AddSmileyWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>App.xaml</DependentUpon>
@@ -102,6 +106,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="AddSmileyWindow.xaml" />
     <Page Include="PrivateWindow.xaml" />
     <Page Include="SmileyWindow.xaml" />
     <Page Include="Window1.xaml" />
