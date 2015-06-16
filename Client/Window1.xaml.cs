@@ -38,10 +38,8 @@ namespace Client
 	{
 		// Needed to update the form with messages from another thread
 		private delegate void UpdateLogCallback(string strMessage, string transmitter, string receiver, string MessageType);
-		// Needed to set the form to a "disconnected" state from another thread
-		private delegate void CloseConnectionCallback(string strReason);
 		
-		private Smiley _smileys = new Smiley();
+		private Smiley _smileyClass = new Smiley();
 		
 		private Parser _parser = new Parser();
 		
@@ -49,12 +47,17 @@ namespace Client
 		
 		protected Hashtable _privateChats = new Hashtable();
 		
+		protected AddSmileyWindow addSmileyWindow;
+		
 		public Window1()
 		{		
 			InitializeComponent();
 			txtLog.Document.Blocks.Clear();
 			_client = new ChatClient();
 			ChatClient.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
+			
+			addSmileyWindow = new AddSmileyWindow(this);
+			addSmileyWindow.addSmileysToGrid(_smileyClass.getAllSmileys());
 		}
 		
 		private void btnConnect_Click(object sender, EventArgs e)
@@ -209,7 +212,7 @@ namespace Client
     	
     	public void openSmileyWindow(object sender, EventArgs e)
     	{
-    		SmileyWindow window = new SmileyWindow(_smileys);
+    		SmileyWindow window = new SmileyWindow(_smileyClass);
     		window.Show();
     	}
     	
@@ -267,6 +270,20 @@ namespace Client
 				window = (PrivateWindow) _privateChats[partner];
 			}
 			window.Show();
+		}
+		
+		protected void openAddSmileyWindow(object sender, RoutedEventArgs e)
+		{
+    		addSmileyWindow.Show();
+		}
+		
+		public void addSmileyClickEvent(object sender, RoutedEventArgs e)
+		{
+			var actualPosition = txtMessage.SelectionStart;
+			System.Windows.Controls.Image image = (System.Windows.Controls.Image) sender;
+			string text = image.ToolTip.ToString();
+			txtMessage.Text = txtMessage.Text.Insert(actualPosition, text);
+			txtMessage.SelectionStart = actualPosition + text.Length;
 		}
 	}
 }

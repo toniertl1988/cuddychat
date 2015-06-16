@@ -42,6 +42,15 @@
 				        </ToolTip>
 					</MenuItem.ToolTip>
 				</MenuItem>
+				<MenuItem
+					Header="_Hinzufügen"
+					Click="openAddSmileyWindow">
+					<MenuItem.ToolTip>
+						<ToolTip>
+				             Smiley hinzufügen
+				        </ToolTip>
+					</MenuItem.ToolTip>
+				</MenuItem>
 			</MenuItem>
 			<MenuItem
 				Header="_Help"
