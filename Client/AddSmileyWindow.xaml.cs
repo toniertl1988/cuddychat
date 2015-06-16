@@ -72,8 +72,8 @@ namespace Client
                 ImageBehavior.SetAnimatedSource(image, bitmapSmiley);
             	
             	image.ToolTip = element;
-            	image.MouseDown += new MouseButtonEventHandler(mainWindow.addSmileyClickEvent);
             	StackPanel panel = new StackPanel();
+            	panel.MouseDown += new MouseButtonEventHandler(mainWindow.addSmileyClickEvent);
             	panel.MouseEnter += new MouseEventHandler(smileyImageMouseEnter);
             	panel.MouseLeave += new MouseEventHandler(smileyImageMouseLeave);
             	panel.Children.Add(image);

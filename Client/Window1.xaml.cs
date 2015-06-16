@@ -280,7 +280,7 @@ namespace Client
 		public void addSmileyClickEvent(object sender, RoutedEventArgs e)
 		{
 			var actualPosition = txtMessage.SelectionStart;
-			System.Windows.Controls.Image image = (System.Windows.Controls.Image) sender;
+			System.Windows.Controls.Image image = (System.Windows.Controls.Image) VisualTreeHelper.GetChild((DependencyObject) sender, 0);
 			string text = image.ToolTip.ToString();
 			txtMessage.Text = txtMessage.Text.Insert(actualPosition, text);
 			txtMessage.SelectionStart = actualPosition + text.Length;
