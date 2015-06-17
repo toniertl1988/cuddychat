@@ -76,6 +76,7 @@ namespace Client
             	panel.MouseDown += new MouseButtonEventHandler(mainWindow.addSmileyClickEvent);
             	panel.MouseEnter += new MouseEventHandler(smileyImageMouseEnter);
             	panel.MouseLeave += new MouseEventHandler(smileyImageMouseLeave);
+            	panel.Background = System.Windows.Media.Brushes.Transparent;
             	panel.Children.Add(image);
                 
                 Grid.SetRow(panel, rowCount);
@@ -95,13 +96,13 @@ namespace Client
 		public void smileyImageMouseEnter(object sender, RoutedEventArgs e)
 		{
 			StackPanel panel = (StackPanel) sender;
-			panel.Background = new SolidColorBrush(Colors.Silver);
+			panel.Background = System.Windows.Media.Brushes.Silver;
 		}
 		
 		public void smileyImageMouseLeave(object sender, RoutedEventArgs e)
 		{
 			StackPanel panel = (StackPanel) sender;
-			panel.Background = new SolidColorBrush(Colors.WhiteSmoke);
+			panel.Background = System.Windows.Media.Brushes.WhiteSmoke;
 		}
 		
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
