@@ -44,7 +44,7 @@ namespace Client
     		int tmpRowCount = (int) Math.Ceiling((decimal) (smileys.Count/3));
     		for (int tmp = 0; tmp < tmpRowCount; tmp++) {
     			RowDefinition gridRow = new RowDefinition();
-				gridRow.Height = new GridLength(30);
+				gridRow.Height = new GridLength(35);
 				windowGrid.RowDefinitions.Add(gridRow);
     		}
 
@@ -69,20 +69,32 @@ namespace Client
                 image.SnapsToDevicePixels = true;
                 image.VerticalAlignment = VerticalAlignment.Center;
                 image.HorizontalAlignment = HorizontalAlignment.Center;
-                ImageBehavior.SetAnimatedSource(image, bitmapSmiley);
-            	
+                ImageBehavior.SetAnimatedSource(image, bitmapSmiley);            
             	image.ToolTip = element;
+            	
+            	Border border = new Border();
+            	border.BorderBrush = System.Windows.Media.Brushes.WhiteSmoke;
+            	border.CornerRadius = new CornerRadius(5.0, 5.0, 5.0, 5.0);
+            	border.BorderThickness = new System.Windows.Thickness(1.0, 1.0, 1.0, 1.0);
+            	border.Margin = new System.Windows.Thickness(2.0);
+            	border.MouseDown += new MouseButtonEventHandler(mainWindow.addSmileyClickEvent);
+            	border.MouseEnter += new MouseEventHandler(smileyImageMouseEnter);
+            	border.MouseLeave += new MouseEventHandler(smileyImageMouseLeave);
+            	
             	StackPanel panel = new StackPanel();
-            	panel.MouseDown += new MouseButtonEventHandler(mainWindow.addSmileyClickEvent);
-            	panel.MouseEnter += new MouseEventHandler(smileyImageMouseEnter);
-            	panel.MouseLeave += new MouseEventHandler(smileyImageMouseLeave);
             	panel.Background = System.Windows.Media.Brushes.Transparent;
+            	panel.HorizontalAlignment = HorizontalAlignment.Center;
+            	panel.VerticalAlignment = VerticalAlignment.Center;
+            	            
             	panel.Children.Add(image);
+            	
+            	
+            	border.Child = panel;
                 
-                Grid.SetRow(panel, rowCount);
-    			Grid.SetColumn(panel, columnCount);
+                Grid.SetRow(border, rowCount);
+    			Grid.SetColumn(border, columnCount);
     			
-    			windowGrid.Children.Add(panel);
+    			windowGrid.Children.Add(border);
     			
 				columnCount++;
 				
@@ -95,14 +107,16 @@ namespace Client
 		
 		public void smileyImageMouseEnter(object sender, RoutedEventArgs e)
 		{
-			StackPanel panel = (StackPanel) sender;
-			panel.Background = System.Windows.Media.Brushes.Silver;
+			Border border = (Border) sender;
+			border.Background = System.Windows.Media.Brushes.LightGray;
+			border.BorderBrush = System.Windows.Media.Brushes.Silver;
 		}
 		
 		public void smileyImageMouseLeave(object sender, RoutedEventArgs e)
 		{
-			StackPanel panel = (StackPanel) sender;
-			panel.Background = System.Windows.Media.Brushes.WhiteSmoke;
+			Border border = (Border) sender;
+			border.Background = System.Windows.Media.Brushes.WhiteSmoke;
+			border.BorderBrush = System.Windows.Media.Brushes.WhiteSmoke;
 		}
 		
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
