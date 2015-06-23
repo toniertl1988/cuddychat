@@ -280,11 +280,14 @@ namespace Client
 		public void addSmileyClickEvent(object sender, RoutedEventArgs e)
 		{
 			var actualPosition = txtMessage.SelectionStart;
-			StackPanel panel = (StackPanel) VisualTreeHelper.GetChild((DependencyObject) sender, 0);
-			System.Windows.Controls.Image image = (System.Windows.Controls.Image) VisualTreeHelper.GetChild((DependencyObject) panel, 0);
+			Border border = (Border) sender;
+			System.Windows.Controls.Image image = (System.Windows.Controls.Image) border.FindResource("smiley");
 			string text = image.ToolTip.ToString();
 			txtMessage.Text = txtMessage.Text.Insert(actualPosition, text);
 			txtMessage.SelectionStart = actualPosition + text.Length;
+			Thread.Sleep(150);
+			addSmileyWindow.Hide();
+			txtMessage.Focus();
 		}
 	}
 }

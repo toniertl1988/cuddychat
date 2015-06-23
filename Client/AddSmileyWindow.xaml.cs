@@ -88,8 +88,8 @@ namespace Client
             	            
             	panel.Children.Add(image);
             	
-            	
             	border.Child = panel;
+            	border.Resources.Add("smiley", image);
                 
                 Grid.SetRow(border, rowCount);
     			Grid.SetColumn(border, columnCount);
