@@ -82,7 +82,7 @@ namespace Client
 				btnConnect.Content = "Connect";
 				txtIp.IsEnabled = true;
 				txtUser.IsEnabled = true;
-				_client.closeConnection("Disconnected at user's request.");
+				_client.closeConnection();
 			}
 		}
 		
@@ -193,7 +193,7 @@ namespace Client
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
         	if (_client.connected != false) {
-        		_client.closeConnection("Disconnect");
+        		_client.closeConnection();
         	}
         	foreach (DictionaryEntry element in _privateChats) {
         		PrivateWindow actualWindow = (PrivateWindow) element.Value;
@@ -205,7 +205,7 @@ namespace Client
     	public void closeApplication(object sender, EventArgs e)
     	{
     		if (_client.connected != false) {
-        		_client.closeConnection("Disconnect");
+        		_client.closeConnection();
         	}
     		Application.Current.Shutdown();
     	}

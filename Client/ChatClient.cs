@@ -29,7 +29,6 @@ namespace Client
 	/// </summary>
 	public class ChatClient
 	{
-		
 		private List<string> _users = new List<string>();
 		
 		private BinaryWriter _swSender;
@@ -38,8 +37,6 @@ namespace Client
 		public bool connected = false;
 		
 		private int _port = 8118;
-		
-		private IPAddress _ipAddr;
 		
 		private TcpClient _tcpServer;
 		
@@ -60,12 +57,12 @@ namespace Client
 		public void InitializeConnection(string IP, string User)
 		{
 			_user = User;
-			_ipAddr = IPAddress.Parse(IP);
+			IPAddress ipAddress = IPAddress.Parse(IP);
 			byte[] response;
 			byte[] answer;
 			
 			// Check if IP is reachable
-			bool check = checkIfServerIsReachable();
+			bool check = checkIfServerIsReachable(ipAddress);
 			
 			if (check == false)
 			{
@@ -75,7 +72,7 @@ namespace Client
 			// erstmal verbinden
 			try {
 				_tcpServer = new TcpClient();
-				_tcpServer.Connect(_ipAddr, _port);
+				_tcpServer.Connect(ipAddress, _port);
 			}
 			catch (Exception)
 			{
@@ -174,37 +171,19 @@ namespace Client
 			}
 		}
 		
-		public void closeConnection(string Reason)
+		public void closeConnection()
 		{
 			if (connected) {
 				connected = false;
 				Chatmessage message = new Chatmessage();
 				message.Transmitter = _user;
 				message.Receiver = "global";
-				message.Message = "ClosingChatServerConnectionRequest";
+				message.Message = "Goodbye";
 				message.MessageType = Chatmessage.MESSAGE_TYPE_DISCONNECT;
 				sendMessage(message);
-			
-				// needed here?!
-				//e = new StatusChangedEventArgs(message);
-				//OnStatusChanged(e);
 			}
 			
 			_users.Clear();
-			if (_thrMessaging != null) {
-				//_thrMessaging.Abort();
-			}
-			if (_swSender != null) {
-				//_swSender.Close();
-			}
-			if (_srReceiver != null)
-			{
-				//_srReceiver.Close();
-			}
-			if (_tcpServer != null)
-			{
-				//_tcpServer.Close();
-			}
 		}
 		
 		public void sendMessage(string message)
@@ -233,7 +212,7 @@ namespace Client
 			sendMessage(msg);
 		}
 		
-		public bool checkIfServerIsReachable()
+		public bool checkIfServerIsReachable(IPAddress ipAddress)
 		{
 			Ping pingSender = new Ping();
             PingOptions options = new PingOptions();
@@ -241,7 +220,7 @@ namespace Client
             string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             byte[] buffer = System.Text.Encoding.ASCII.GetBytes (data);
             int timeout = 120;
-            PingReply reply = pingSender.Send (_ipAddr, timeout, buffer, options);
+            PingReply reply = pingSender.Send(ipAddress, timeout, buffer, options);
             if (reply.Status == IPStatus.Success)
             {
             	return true;
