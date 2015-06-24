@@ -288,6 +288,7 @@ namespace Client
 		protected void openAddSmileyWindow(object sender, RoutedEventArgs e)
 		{
     		addSmileyWindow.Show();
+    		addSmileyWindow.Activate();
 		}
 		
 		public void addSmileyClickEvent(object sender, RoutedEventArgs e)

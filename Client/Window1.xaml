@@ -230,6 +230,7 @@
 						Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<Menu
+					Width="Auto"
 					IsMainMenu="False"
 					Grid.Row="0"
 					Grid.Column="0">
