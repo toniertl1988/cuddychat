@@ -3,7 +3,7 @@
 	x:Class="Client.Window1" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	Title="Cuddy Chat Client"
 	Width="480"
-	Height="530"
+	Height="560"
 	Closing="Window_Closing">
 	<DockPanel
 		Width="Auto"
@@ -80,10 +80,12 @@
 					Height="Auto" />
 				<RowDefinition
 					Height="Auto" />
+				<RowDefinition
+					Height="*" />
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition
-					Width="Auto" />
+					Width="*" />
 			</Grid.ColumnDefinitions>
 			<Grid
 				Grid.Column="0"
@@ -140,7 +142,7 @@
 					Width="150"
 					Height="25"
 					Margin="3"
-					KeyDown="TxtUser_KeyDown"	/>
+					KeyDown="TxtUser_KeyDown" />
 				<Button
 					Name="btnConnect"
 					Grid.Column="2"
@@ -216,7 +218,7 @@
 			<Grid
 				Grid.Column="0"
 				Grid.Row="2"
-				Margin="5">
+				Margin="5,5,0,-5">
 				<Grid.RowDefinitions>
 					<RowDefinition
 						Height="Auto" />
@@ -224,31 +226,44 @@
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition
 						Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<Menu
+					IsMainMenu="False"
+					Grid.Row="0"
+					Grid.Column="0">
+					<MenuItem
+						Header="_Cheese"
+						Click="openAddSmileyWindow">
+						<MenuItem.Icon>
+							<Image
+								Source="pack://application:,,,/Images/cheese.png" />
+						</MenuItem.Icon>
+					</MenuItem>
+				</Menu>
+			</Grid>
+			<Grid
+				Grid.Column="0"
+				Grid.Row="3"
+				Margin="5">
+				<Grid.RowDefinitions>
+					<RowDefinition
+						MinHeight="50"
+						Height="*" />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
 					<ColumnDefinition
-						Width="Auto" />
+						Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBox
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Stretch"
 					Name="txtMessage"
 					KeyDown="txtMessage_KeyPress"
-					AcceptsReturn="True"
-					Height="31"
-					Width="350"
+					AcceptsReturn="False"
+					TextWrapping="Wrap"
 					Margin="3"
-					VerticalAlignment="Bottom"
-					HorizontalAlignment="Left"
 					Grid.Row="0"
 					Grid.Column="0" />
-				<Button
-					Name="btnSend"
-					Grid.Column="1"
-					Grid.Row="0"
-					Margin="3"
-					HorizontalAlignment="Right"
-					VerticalAlignment="Bottom"
-					Width="88"
-					Height="31"
-					Content="Send"
-					Click="btnSend_Click" />
 			</Grid>
 		</Grid>
 	</DockPanel>

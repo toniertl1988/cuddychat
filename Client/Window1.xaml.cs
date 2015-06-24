@@ -154,13 +154,18 @@ namespace Client
 		
 		private void txtMessage_KeyPress(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Shift)
+			if (e.Key == Key.Enter)
 			{
-				txtMessage.Text += Environment.NewLine;
-			}
-			else if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
-			{
-				SendMessage(txtMessage.Text, "global");
+				if (Keyboard.Modifiers == ModifierKeys.Shift) {
+					int selectionStart = txtMessage.SelectionStart;
+					txtMessage.Text += Environment.NewLine;
+					txtMessage.Select(selectionStart + 1, 0);
+				} else {
+					if (_client.connected && txtMessage.Text.Length > 0) {
+						SendMessage(txtMessage.Text, "global");
+					}
+				}
+
 			}
 		}
 		
@@ -236,7 +241,9 @@ namespace Client
 		{
 			if (e.Key == Key.Enter)
 			{
-				btnConnect_Click(sender, e);
+				if (!_client.connected) {
+					btnConnect_Click(sender, e);
+				}
 			}
 		}
 		

@@ -127,6 +127,7 @@
   <ItemGroup>
     <Resource Include="Images\info.png" />
     <None Include="app.config" />
+    <Resource Include="Images\cheese.png" />
     <None Include="WpfAnimatedGif.dll" />
   </ItemGroup>
   <ItemGroup>

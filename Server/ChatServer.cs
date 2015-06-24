@@ -120,7 +120,7 @@ namespace Server
 			e = new StatusChangedEventArgs(userMessage);
 			OnStatusChanged(e);
 			
-			if (Receiver == "global" && Message.Trim() != "")
+			if (Receiver == "global")
 			{
 				foreach (KeyValuePair<string, User> entry in ChatServer.userInfos)
 				{

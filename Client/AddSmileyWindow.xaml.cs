@@ -124,6 +124,7 @@ namespace Client
 		    base.OnClosing(e);
 		    e.Cancel = true;
 		    this.Hide();
+		    this.mainWindow.txtMessage.Focus();
 		}
 	}
 }
