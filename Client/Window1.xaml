@@ -192,7 +192,9 @@
 					Margin="3"
 					Height="300"
 					SelectionMode="Single"
-					MouseDoubleClick="ListUser_MouseDoubleClick">
+					ContextMenuService.IsEnabled="False"
+					MouseDoubleClick="ListUser_MouseDoubleClick"
+				>
 					<ListBox.ContextMenu>
 						<ContextMenu>
 							<MenuItem

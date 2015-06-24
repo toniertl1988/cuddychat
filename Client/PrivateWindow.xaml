@@ -18,12 +18,12 @@
 				HorizontalContentAlignment="Left"
 				HorizontalAlignment="Left">
 				<MenuItem
-					Header="_Beenden"
+					Header="_Schließen"
 					Click="closeWindow"
 					InputGestureText="Alt-F4">
 					<MenuItem.ToolTip>
 						<ToolTip>
-				             Schließt die Anwendung
+				             Schließt das Private Chatfenster
 				        </ToolTip>
 					</MenuItem.ToolTip>
 				</MenuItem>
@@ -83,10 +83,11 @@
 				</Grid.ColumnDefinitions>
 				<TextBox
 					Name="txtMessage"
-					AcceptsReturn="True"
+					AcceptsReturn="False"
 					Height="31"
 					Width="230"
 					Margin="3"
+					KeyDown="txtMessage_KeyPress"
 					VerticalAlignment="Bottom"
 					HorizontalAlignment="Left"
 					Grid.Row="0"

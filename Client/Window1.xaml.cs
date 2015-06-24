@@ -93,12 +93,14 @@ namespace Client
 				btnConnect.Content = "Disconnect";
 				txtIp.IsEnabled = false;
 				txtUser.IsEnabled = false;
+				ContextMenuService.SetIsEnabled(listUser, true);
 			}
 			else
 			{
 				btnConnect.Content = "Connect";
 				txtIp.IsEnabled = true;
-				txtUser.IsEnabled = true;				
+				txtUser.IsEnabled = true;
+				ContextMenuService.SetIsEnabled(listUser, false);
 			}
 			if (strMessage.Length != 0)
 			{
@@ -249,12 +251,16 @@ namespace Client
 		
 		public void openPrivateChat(object sender, EventArgs e)
 		{
-			openPrivateChat(listUser.SelectedItem.ToString());
+			if (_client.connected) {
+				openPrivateChat(listUser.SelectedItem.ToString());
+			}
 		}
 		
 		public void ListUser_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			openPrivateChat(listUser.SelectedItem.ToString());
+			if (_client.connected) {
+				openPrivateChat(listUser.SelectedItem.ToString());
+			}
 		}
 		
 		public void closePrivateChat(string partner)

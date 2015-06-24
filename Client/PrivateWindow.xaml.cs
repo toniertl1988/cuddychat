@@ -42,6 +42,23 @@ namespace Client
 			mainWindow = owner;
 		}
 		
+		private void txtMessage_KeyPress(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				if (Keyboard.Modifiers == ModifierKeys.Shift) {
+					int selectionStart = txtMessage.SelectionStart;
+					txtMessage.Text += Environment.NewLine;
+					txtMessage.Select(selectionStart + 1, 0);
+				} else {
+					if (txtMessage.Text.Length > 0) {
+						mainWindow.SendMessage(txtMessage.Text, chatPartner);
+					}
+				}
+
+			}
+		}
+		
     	public void closeWindow(object sender, EventArgs e)
     	{
     		this.mainWindow.closePrivateChat(this.chatPartner);
