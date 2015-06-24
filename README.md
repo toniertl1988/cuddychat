@@ -2,7 +2,7 @@ cuddychat
 =========
 Chat Server &amp; Client
 
-History
+History - implemented Features
 =======
 - Version 1.0 - released - server and client are stable + hard coded smiley parsing of :D
 - Version 1.0.1 - released - better gui xaml code
@@ -21,18 +21,15 @@ History
 
 Roadmap
 ======
-- Version 1.1.09 - send user info to server for info of user on right click in user list in client (login time, operating system)
+features in near future:
+- send user info to server for info of user on right click in user list in client (login time, operating system)
+- add smiley window
+- improved enter behaviour in textareas
+- private chats
+- file transfer with private chats
+- dynamic smiley add and parsing
+- single instance of server
+- single instance of client
 
-- Version 1.1.10 - add smiley window
-
-- Version 1.2 - private chats - already working - focus after user info
-
-- Version 1.3 - file transfer with private chats - focus after user info
-
-- Version 1.4 - dynamic smiley add and parsing
-
-- Version 1.5 - single instances
-- Version 1.5.01 - single instance of server
-- Version 1.5.02 - single instance of client
-
-- Version 1.6 - login window + registration with server
+features in far away future:
+- login window + registration with server
