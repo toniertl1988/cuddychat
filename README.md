@@ -16,6 +16,10 @@ History - implemented Features
 - send and receive messages over binarystream with rsa + rijndael - security level high enough atm
 - parsing of hyperlinks in client
 - logged in user list in client, atm with rightclick on list with info and msg box with clicked user name, more later
+- send user info to server for info of user on right click in user list in client (login time, operating system)
+- single instance of server
+- private chats
+- improved enter behaviour in textareas
 
 - with lots of thanks to http://wpfanimatedgif.codeplex.com/ for animated gifs in client :-)
 
@@ -23,13 +27,9 @@ History - implemented Features
 Roadmap
 ======
 features in near future:
-- send user info to server for info of user on right click in user list in client (login time, operating system)
 - add smiley window
-- improved enter behaviour in textareas
-- private chats
 - file transfer with private chats
 - dynamic smiley add and parsing
-- single instance of server
 - single instance of client
 
 features in far away future:
