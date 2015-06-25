@@ -29,6 +29,10 @@ namespace Client
 	{
 		protected Window1 mainWindow;
 		
+		protected int row = 0;
+		
+		protected int column = 0;
+		
 		public AddSmileyWindow(Window1 mainWindow)
 		{
 			this.mainWindow = mainWindow;
@@ -95,6 +99,7 @@ namespace Client
     			Grid.SetColumn(border, columnCount);
     			
     			windowGrid.Children.Add(border);
+    			windowGrid.Resources.Add(new { Row = rowCount, Column = columnCount }, border);
     			
 				columnCount++;
 				
@@ -103,18 +108,34 @@ namespace Client
 					rowCount++;
 				}
 			}
+    		changeBackgroundOnEnterEvent((Border) windowGrid.FindResource(new {Row = 0, Column = 0}));
 		}
 		
 		public void smileyImageMouseEnter(object sender, RoutedEventArgs e)
 		{
+			foreach (var element in windowGrid.Children) {
+				changeBackgrounOnLeaveEvent((Border) element);
+			}
 			Border border = (Border) sender;
-			border.Background = System.Windows.Media.Brushes.LightGray;
-			border.BorderBrush = System.Windows.Media.Brushes.Silver;
+			this.row = Grid.GetRow(border);
+			this.column = Grid.GetColumn(border);
+			changeBackgroundOnEnterEvent(border);
 		}
 		
 		public void smileyImageMouseLeave(object sender, RoutedEventArgs e)
 		{
 			Border border = (Border) sender;
+			changeBackgrounOnLeaveEvent(border);
+		}
+		
+		protected void changeBackgroundOnEnterEvent(Border border)
+		{
+			border.Background = System.Windows.Media.Brushes.LightGray;
+			border.BorderBrush = System.Windows.Media.Brushes.Silver;
+		}
+		
+		protected void changeBackgrounOnLeaveEvent(Border border)
+		{
 			border.Background = System.Windows.Media.Brushes.WhiteSmoke;
 			border.BorderBrush = System.Windows.Media.Brushes.WhiteSmoke;
 		}
@@ -125,6 +146,46 @@ namespace Client
 		    e.Cancel = true;
 		    this.Hide();
 		    this.mainWindow.txtMessage.Focus();
+		}
+		
+		public void Window_KeyDown(object sender, KeyEventArgs e)
+		{
+			int tmpRow = this.row;
+			int tmpColumn = this.column;
+			
+			Border oldBorder;
+			Border newBorder;
+			
+			if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right) {
+				oldBorder = (Border) windowGrid.TryFindResource(new {Row = tmpRow, Column = tmpColumn});
+				switch (e.Key) {
+					case Key.Up:
+						tmpRow--;
+						break;
+					case Key.Down:
+						tmpRow++;
+						break;
+					case Key.Left:
+						tmpColumn--;
+						break;
+					case Key.Right:
+						tmpColumn++;
+						break;
+				}
+				newBorder = (Border) windowGrid.TryFindResource(new {Row = tmpRow, Column = tmpColumn});
+				if (newBorder != null) {
+					changeBackgrounOnLeaveEvent(oldBorder);
+					changeBackgroundOnEnterEvent(newBorder);
+					this.row = tmpRow;
+					this.column = tmpColumn;
+				}
+			}
+			if (e.Key == Key.Enter) {
+				Border border = (Border) windowGrid.TryFindResource(new {Row = tmpRow, Column = tmpColumn});
+				if (border != null) {
+					this.mainWindow.addSmileyClickEvent(border, new RoutedEventArgs());
+				}
+			}
 		}
 	}
 }

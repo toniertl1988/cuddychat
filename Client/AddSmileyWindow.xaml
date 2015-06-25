@@ -1,7 +1,9 @@
 ﻿<Window x:Class="Client.AddSmileyWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	Title="Add a Smiley" Height="200" Width="200" MaxWidth="200" MinWidth="200" MaxHeight="200" MinHeight="200" Background="WhiteSmoke">
+	Title="Add a Smiley" Height="200" Width="200" MaxWidth="200" MinWidth="200" MaxHeight="200" MinHeight="200" Background="WhiteSmoke"
+	KeyDown="Window_KeyDown"
+	>
 	
 	<Grid Name="windowGrid">
     	<Grid.Resources>
