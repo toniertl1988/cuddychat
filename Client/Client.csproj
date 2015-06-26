@@ -87,6 +87,7 @@
       <SubType>Code</SubType>
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BaseWindow.cs" />
     <Compile Include="ChatClient.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="PrivateWindow.xaml.cs">

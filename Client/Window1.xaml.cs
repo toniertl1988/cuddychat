@@ -34,12 +34,12 @@ namespace Client
 	/// <summary>
 	/// Interaction logic for Window1.xaml
 	/// </summary>
-	public partial class Window1 : Window
+	public partial class Window1 : Window, BaseWindow
 	{
 		// Needed to update the form with messages from another thread
 		private delegate void UpdateLogCallback(string strMessage, string transmitter, string receiver, string MessageType);
 		
-		private Smiley _smileyClass = new Smiley();
+		public Smiley smileyClass = new Smiley();
 		
 		private Parser _parser = new Parser();
 		
@@ -57,7 +57,7 @@ namespace Client
 			ChatClient.StatusChanged += new StatusChangedEventHandler(mainServer_StatusChanged);
 			
 			addSmileyWindow = new AddSmileyWindow(this);
-			addSmileyWindow.addSmileysToGrid(_smileyClass.getAllSmileys());
+			addSmileyWindow.addSmileysToGrid(smileyClass.getAllSmileys());
 		}
 		
 		private void btnConnect_Click(object sender, EventArgs e)
@@ -219,7 +219,7 @@ namespace Client
     	
     	public void openSmileyWindow(object sender, EventArgs e)
     	{
-    		SmileyWindow window = new SmileyWindow(_smileyClass);
+    		SmileyWindow window = new SmileyWindow(smileyClass);
     		window.Show();
     	}
     	
@@ -291,17 +291,9 @@ namespace Client
     		addSmileyWindow.Activate();
 		}
 		
-		public void addSmileyClickEvent(object sender, RoutedEventArgs e)
+		public TextBox getMessageElement()
 		{
-			var actualPosition = txtMessage.SelectionStart;
-			Border border = (Border) sender;
-			System.Windows.Controls.Image image = (System.Windows.Controls.Image) border.FindResource("smiley");
-			string text = image.ToolTip.ToString();
-			txtMessage.Text = txtMessage.Text.Insert(actualPosition, text);
-			txtMessage.SelectionStart = actualPosition + text.Length;
-			Thread.Sleep(150);
-			addSmileyWindow.Hide();
-			txtMessage.Focus();
+			return txtMessage;
 		}
 	}
 }

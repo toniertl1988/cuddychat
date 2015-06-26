@@ -23,11 +23,13 @@ namespace Client
 	/// <summary>
 	/// Interaction logic for PrivateWindow.xaml
 	/// </summary>
-	public partial class PrivateWindow : Window
+	public partial class PrivateWindow : Window, BaseWindow
 	{
 		protected Window1 mainWindow;
 		
 		protected string chatPartner;
+		
+		protected AddSmileyWindow addSmileyWindow;
 		
 		public PrivateWindow(string chatPartner)
 		{
@@ -35,11 +37,13 @@ namespace Client
 			txtLog.Document.Blocks.Clear();
 			this.chatPartner = chatPartner;
 			this.Title = "Privater Chat mit " + chatPartner;
+			addSmileyWindow = new AddSmileyWindow(this);
 		}
 		
 		public void setOwner(Window1 owner)
 		{
 			mainWindow = owner;
+			addSmileyWindow.addSmileysToGrid(owner.smileyClass.getAllSmileys());
 		}
 		
 		private void txtMessage_KeyPress(object sender, KeyEventArgs e)
@@ -67,6 +71,17 @@ namespace Client
 		public void BtnSend_Click(object sender, RoutedEventArgs e)
 		{
 			mainWindow.SendMessage(txtMessage.Text, chatPartner);
+		}
+		
+		public TextBox getMessageElement()
+		{
+			return txtMessage;
+		}
+		
+		protected void openAddSmileyWindow(object sender, RoutedEventArgs e)
+		{
+    		addSmileyWindow.Show();
+    		addSmileyWindow.Activate();
 		}
 		
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

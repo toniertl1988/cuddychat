@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Collections;
 using System.Windows.Controls;
@@ -27,16 +28,24 @@ namespace Client
 	/// </summary>
 	public partial class AddSmileyWindow : Window
 	{
-		protected Window1 mainWindow;
+		protected BaseWindow mainWindow;
 		
 		protected int row = 0;
 		
 		protected int column = 0;
 		
-		public AddSmileyWindow(Window1 mainWindow)
+		public AddSmileyWindow(BaseWindow mainWindow)
 		{
 			this.mainWindow = mainWindow;
 			InitializeComponent();
+		}
+		
+		public new void Show()
+		{
+			this.row = 0;
+			this.column = 0;
+			changeBackgroundOnEnterEvent((Border) windowGrid.FindResource(new {Row = this.row, Column = this.column}));
+			base.Show();
 		}
 		
 		public void addSmileysToGrid(Hashtable smileys)
@@ -81,7 +90,7 @@ namespace Client
             	border.CornerRadius = new CornerRadius(5.0, 5.0, 5.0, 5.0);
             	border.BorderThickness = new System.Windows.Thickness(1.0, 1.0, 1.0, 1.0);
             	border.Margin = new System.Windows.Thickness(2.0);
-            	border.MouseDown += new MouseButtonEventHandler(mainWindow.addSmileyClickEvent);
+            	border.MouseDown += new MouseButtonEventHandler(addSmileyClickEvent);
             	border.MouseEnter += new MouseEventHandler(smileyImageMouseEnter);
             	border.MouseLeave += new MouseEventHandler(smileyImageMouseLeave);
             	
@@ -113,9 +122,6 @@ namespace Client
 		
 		public void smileyImageMouseEnter(object sender, RoutedEventArgs e)
 		{
-			foreach (var element in windowGrid.Children) {
-				changeBackgrounOnLeaveEvent((Border) element);
-			}
 			Border border = (Border) sender;
 			this.row = Grid.GetRow(border);
 			this.column = Grid.GetColumn(border);
@@ -128,8 +134,22 @@ namespace Client
 			changeBackgrounOnLeaveEvent(border);
 		}
 		
+		public void addSmileyClickEvent(object sender, RoutedEventArgs e)
+		{
+			var actualPosition = this.mainWindow.getMessageElement().SelectionStart;
+			Border border = (Border) sender;
+			System.Windows.Controls.Image image = (System.Windows.Controls.Image) border.FindResource("smiley");
+			string text = image.ToolTip.ToString();
+			this.mainWindow.getMessageElement().Text = this.mainWindow.getMessageElement().Text.Insert(actualPosition, text);
+			this.mainWindow.getMessageElement().SelectionStart = actualPosition + text.Length;
+			Thread.Sleep(150);
+			this.Hide();
+			this.mainWindow.getMessageElement().Focus();
+		}
+		
 		protected void changeBackgroundOnEnterEvent(Border border)
 		{
+			resetBorderBackgrounds();
 			border.Background = System.Windows.Media.Brushes.LightGray;
 			border.BorderBrush = System.Windows.Media.Brushes.Silver;
 		}
@@ -142,10 +162,18 @@ namespace Client
 		
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
 		{
+			resetBorderBackgrounds();
 		    base.OnClosing(e);
 		    e.Cancel = true;
 		    this.Hide();
-		    this.mainWindow.txtMessage.Focus();
+		    this.mainWindow.getMessageElement().Focus();
+		}
+		
+		protected void resetBorderBackgrounds()
+		{
+			foreach (var element in windowGrid.Children) {
+				changeBackgrounOnLeaveEvent((Border) element);
+			}
 		}
 		
 		public void Window_KeyDown(object sender, KeyEventArgs e)
@@ -183,7 +211,7 @@ namespace Client
 			if (e.Key == Key.Enter) {
 				Border border = (Border) windowGrid.TryFindResource(new {Row = tmpRow, Column = tmpColumn});
 				if (border != null) {
-					this.mainWindow.addSmileyClickEvent(border, new RoutedEventArgs());
+					addSmileyClickEvent(border, new RoutedEventArgs());
 				}
 			}
 		}
